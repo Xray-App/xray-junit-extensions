@@ -1,0 +1,7 @@
+.classpath
+.vscode
+.project
+.settings/
+.DS_Store
+target/
+src/test/java/com/xpandit/xray/junit/customjunitxml/wip/
