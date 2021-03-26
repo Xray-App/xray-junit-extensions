@@ -1,9 +1,9 @@
 # xray-junit-extensions
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fbitcoder%2Fxray-junit-extensions.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fbitcoder%2Fxray-junit-extensions?ref=badge_shield)
-
 
 ![build workflow](https://github.com/bitcoder/xray-junit-extensions/actions/workflows/CI.yml/badge.svg)
 [![Known Vulnerabilities](https://snyk.io/test/github/bitcoder/xray-junit-extensions/badge.svg)](https://snyk.io/test/github/bitcoder/xray-junit-extensions)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fbitcoder%2Fxray-junit-extensions.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fbitcoder%2Fxray-junit-extensions?ref=badge_shield)
+[![license](https://img.shields.io/badge/License-EPL%202.0-red.svg)](https://opensource.org/licenses/EPL-2.0)
 
 This repo contains several improvements for [JUnit](https://junit.org/junit5/) that allow you to take better advantage of JUnit 5 (juniperwhenever using it together with [Xray Test Management](https://getxray.app).
 This code is provided as-is; you're free to use it and modify it at your will (see license ahead).
