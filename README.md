@@ -1,4 +1,6 @@
 # xray-junit-extensions
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fbitcoder%2Fxray-junit-extensions.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fbitcoder%2Fxray-junit-extensions?ref=badge_shield)
+
 
 ![build workflow](https://github.com/bitcoder/xray-junit-extensions/actions/workflows/CI.yml/badge.svg)
 [![Known Vulnerabilities](https://snyk.io/test/github/bitcoder/xray-junit-extensions/badge.svg)](https://snyk.io/test/github/bitcoder/xray-junit-extensions)
@@ -229,3 +231,6 @@ For Xray specific questions, please contact [Xray's support team](https://jira.x
 ## LICENSE
 
 [Eclipse Public License - v 2.0](LICENSE)
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fbitcoder%2Fxray-junit-extensions.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fbitcoder%2Fxray-junit-extensions?ref=badge_large)
