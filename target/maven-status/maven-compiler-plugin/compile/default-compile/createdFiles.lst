@@ -1,0 +1,10 @@
+com/xpandit/xray/junit/customjunitxml/XrayTestReporterParameterResolver.class
+com/xpandit/xray/junit/customjunitxml/XrayTestReporterImpl.class
+com/xpandit/xray/junit/customjunitxml/annotations/XrayTest.class
+com/xpandit/xray/junit/customjunitxml/annotations/Requirement.class
+com/xpandit/xray/junit/customjunitxml/XmlReportWriter$AggregatedTestResult.class
+com/xpandit/xray/junit/customjunitxml/XmlReportData.class
+com/xpandit/xray/junit/customjunitxml/XmlReportWriter$AggregatedTestResult$Type.class
+com/xpandit/xray/junit/customjunitxml/XrayTestReporter.class
+com/xpandit/xray/junit/customjunitxml/EnhancedLegacyXmlReportGeneratingListener.class
+com/xpandit/xray/junit/customjunitxml/XmlReportWriter.class

@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EnhancedLegacyXmlReportGeneratingListener.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">xray-junit-extensions</a> &gt; <a href="index.source.html" class="el_package">com.xpandit.xray.junit.customjunitxml</a> &gt; <span class="el_source">EnhancedLegacyXmlReportGeneratingListener.java</span></div><h1>EnhancedLegacyXmlReportGeneratingListener.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2015-2021 the original author or authors.
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License v2.0 which
+ * accompanies this distribution and is available at
+ *
+ * https://www.eclipse.org/legal/epl-v20.html
+ */
+
+package com.xpandit.xray.junit.customjunitxml;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Writer;
+import java.lang.reflect.Method;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Clock;
+
+import java.util.Optional;
+import java.util.stream.Stream;
+import javax.xml.stream.XMLStreamException;
+import java.util.Set;
+
+import org.apiguardian.api.API;
+import org.junit.platform.commons.logging.Logger;
+import org.junit.platform.commons.logging.LoggerFactory;
+import org.junit.platform.commons.support.AnnotationSupport;
+import org.junit.platform.engine.TestExecutionResult;
+import org.junit.platform.engine.UniqueId;
+import org.junit.platform.engine.reporting.ReportEntry;
+import org.junit.platform.engine.support.descriptor.ClassSource;
+import org.junit.platform.engine.support.descriptor.MethodSource;
+import org.junit.platform.launcher.TestExecutionListener;
+import org.junit.platform.launcher.TestIdentifier;
+import org.junit.platform.launcher.TestPlan;
+import org.junit.platform.engine.TestSource;
+
+/**
+ * {@code EnhancedLegacyXmlReportGeneratingListener} is a
+ * {@link TestExecutionListener} that generates a separate XML report for each
+ * {@linkplain TestPlan#getRoots() root} in the {@link TestPlan}.
+ *
+ * &lt;p&gt;
+ * Note that the generated XML format is compatible with the &lt;em&gt;legacy&lt;/em&gt; de
+ * facto standard for JUnit 4 based test reports that was made popular by the
+ * Ant build system.
+ *
+ * @since 1.4
+ * @see org.junit.platform.launcher.listeners.LoggingListener
+ * @see org.junit.platform.launcher.listeners.SummaryGeneratingListener
+ */
+
+public class EnhancedLegacyXmlReportGeneratingListener implements TestExecutionListener {
+
+	private final Path reportsDir;
+	private final PrintWriter out;
+	private final Clock clock;
+
+	private XmlReportData reportData;
+
+	public static final String DEFAULT_REPORTS_DIR = &quot;./reports&quot;;
+<span class="fc" id="L66">	private static final Logger logger = LoggerFactory.getLogger(EnhancedLegacyXmlReportGeneratingListener.class);</span>
+
+	public EnhancedLegacyXmlReportGeneratingListener() {
+<span class="nc" id="L69">		this(FileSystems.getDefault().getPath(DEFAULT_REPORTS_DIR), new PrintWriter(System.out, true),</span>
+<span class="nc" id="L70">				Clock.systemDefaultZone());</span>
+<span class="nc" id="L71">	}</span>
+
+	public EnhancedLegacyXmlReportGeneratingListener(Path reportsDir, PrintWriter out) {
+<span class="fc" id="L74">		this(reportsDir, out, Clock.systemDefaultZone());</span>
+<span class="fc" id="L75">	}</span>
+
+	// For tests only
+<span class="fc" id="L78">	public EnhancedLegacyXmlReportGeneratingListener(Path reportsDir, PrintWriter out, Clock clock) {</span>
+<span class="fc" id="L79">		this.reportsDir = reportsDir;</span>
+<span class="fc" id="L80">		this.out = out;</span>
+<span class="fc" id="L81">		this.clock = clock;</span>
+<span class="fc" id="L82">	}</span>
+
+	@Override
+	public void testPlanExecutionStarted(TestPlan testPlan) {
+<span class="fc" id="L86">		this.reportData = new XmlReportData(testPlan, clock);</span>
+		try {
+<span class="fc" id="L88">			Files.createDirectories(this.reportsDir);</span>
+<span class="nc" id="L89">		} catch (IOException e) {</span>
+<span class="nc" id="L90">			printException(&quot;Could not create reports directory: &quot; + this.reportsDir, e);</span>
+<span class="nc" id="L91">			logger.error(e, () -&gt; &quot;Could not create reports directory: &quot; + this.reportsDir);</span>
+<span class="fc" id="L92">		}</span>
+		// note: it's possible to get parent for the testidentifier from the testPlan
+<span class="fc" id="L94">	}</span>
+
+	@Override
+	public void testPlanExecutionFinished(TestPlan testPlan) {
+<span class="fc" id="L98">		this.reportData = null;</span>
+<span class="fc" id="L99">	}</span>
+
+	@Override
+	public void executionSkipped(TestIdentifier testIdentifier, String reason) {
+<span class="nc" id="L103">		this.reportData.markSkipped(testIdentifier, reason);</span>
+<span class="nc" id="L104">		writeXmlReportInCaseOfRoot(testIdentifier);</span>
+<span class="nc" id="L105">	}</span>
+
+	@Override
+	public void executionStarted(TestIdentifier testIdentifier) {
+<span class="fc" id="L109">		this.reportData.markStarted(testIdentifier);</span>
+<span class="fc" id="L110">	}</span>
+
+	@Override
+	public void reportingEntryPublished(TestIdentifier testIdentifier, ReportEntry entry) {
+<span class="fc" id="L114">		this.reportData.addReportEntry(testIdentifier, entry);</span>
+<span class="fc" id="L115">	}</span>
+
+	@Override
+	public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult result) {
+<span class="fc" id="L119">		this.reportData.markFinished(testIdentifier, result);</span>
+<span class="fc" id="L120">		writeXmlReportInCaseOfRoot(testIdentifier);</span>
+<span class="fc" id="L121">	}</span>
+
+	private void writeXmlReportInCaseOfRoot(TestIdentifier testIdentifier) {
+<span class="fc bfc" id="L124" title="All 2 branches covered.">		if (isRoot(testIdentifier)) {</span>
+<span class="fc" id="L125">			String rootName = UniqueId.parse(testIdentifier.getUniqueId()).getSegments().get(0).getValue();</span>
+<span class="fc" id="L126">			writeXmlReportSafely(testIdentifier, rootName);</span>
+		}
+<span class="fc" id="L128">	}</span>
+
+	private void writeXmlReportSafely(TestIdentifier testIdentifier, String rootName) {
+<span class="fc" id="L131">		Path xmlFile = this.reportsDir.resolve(&quot;TEST-&quot; + rootName + &quot;.xml&quot;);</span>
+<span class="fc" id="L132">		try (Writer fileWriter = Files.newBufferedWriter(xmlFile)) {</span>
+<span class="fc" id="L133">			new XmlReportWriter(this.reportData).writeXmlReport(testIdentifier, fileWriter);</span>
+<span class="nc" id="L134">		} catch (XMLStreamException | IOException e) {</span>
+<span class="nc" id="L135">			printException(&quot;Could not write XML report: &quot; + xmlFile, e);</span>
+<span class="nc" id="L136">			logger.error(e, () -&gt; &quot;Could not write XML report: &quot; + xmlFile);</span>
+<span class="fc" id="L137">		}</span>
+<span class="fc" id="L138">	}</span>
+
+	private boolean isRoot(TestIdentifier testIdentifier) {
+<span class="fc bfc" id="L141" title="All 2 branches covered.">		return !testIdentifier.getParentId().isPresent();</span>
+	}
+
+	private void printException(String message, Exception exception) {
+<span class="nc" id="L145">		out.println(message);</span>
+<span class="nc" id="L146">		exception.printStackTrace(out);</span>
+<span class="nc" id="L147">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>
