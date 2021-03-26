@@ -8,7 +8,7 @@ https://raw.githubusercontent.com/bitcoder/xray-junit-extensions/main/.github/ba
 [![license](https://img.shields.io/badge/License-EPL%202.0-green.svg)](https://opensource.org/licenses/EPL-2.0)
 [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/xray-junit-extensions/community)
 
-This repo contains several improvements for [JUnit](https://junit.org/junit5/) that allow you to take better advantage of JUnit 5 (juniperwhenever using it together with [Xray Test Management](https://getxray.app).
+This repo contains several improvements for [JUnit](https://junit.org/junit5/) that allow you to take better advantage of JUnit 5 (jupiter engine) whenever using it together with [Xray Test Management](https://getxray.app).
 This code is provided as-is; you're free to use it and modify it at your will (see license ahead).
 
 This is a preliminary release so it is subject to changes, at any time.
