@@ -1,0 +1,217 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.xpandit.xray</groupId>
+    <artifactId>xray-junit-extensions</artifactId>
+    <packaging>jar</packaging>
+    <version>0.1.0</version>
+    <name>xray-junit-extensions</name>
+    <url>http://maven.apache.org</url>
+    <properties>
+        <junit-jupiter.version>5.7.1</junit-jupiter.version>
+        <junit.version>4.12</junit.version>
+        <junit-platform.version>1.7.1</junit-platform.version>
+        <slf4j-log4j12.version>1.7.25</slf4j-log4j12.version>
+
+        <!--Xray Properties -->
+
+        <!--IN PROFILE ~.m2/settings.xml-->
+        <!--<xray.jiraURL></xray.jiraURL>
+        <xray.resultsFormat>JUNIT</xray.resultsFormat>
+        <xray.username>admin</xray.username>
+        <xray.password>admin</xray.password>
+        <xray.projectKey>JUNIT</xray.projectKey>
+        <xray.testExecKey></xray.testExecKey>
+        <xray.testPlanKey></xray.testPlanKey>
+        <xray.testEnvironments></xray.testEnvironments>
+        <xray.revision></xray.revision>
+        -->
+
+        <!--End Xray Properties -->
+
+
+        <version.maven-plugin-plugin>3.6.0</version.maven-plugin-plugin>
+      
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit-jupiter.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>${junit-jupiter.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit-jupiter.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-suite-api</artifactId>
+            <version>${junit-platform.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-reporting</artifactId>
+            <version>${junit-platform.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <version>${junit-platform.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-runner</artifactId>
+            <version>${junit-platform.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.19.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>joox-java-6</artifactId>
+            <version>1.6.2</version>
+            <scope>test</scope>
+        </dependency>
+        <!--
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.10.19</version>
+            <scope>test</scope>
+        </dependency>
+    -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>3.8.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-testkit</artifactId>
+            <version>1.7.1</version>
+            <scope>test</scope>
+        </dependency>
+                
+    </dependencies>
+    
+    <distributionManagement>
+        <!-- repository>
+            <id>xpand-releases</id>
+            <name>xpand-releases</name>
+            <url>http://maven.xpand-it.com/artifactory/libs-releases-local</url>
+        </repository -->
+        <repository>
+            <id>github</id>
+            <name>GitHub bitcoder Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/bitcoder/xray-junit-extensions</url>
+        </repository>
+        <snapshotRepository>
+            <id>xpand-snapshots</id>
+            <name>xpand-snapshots</name>
+            <url>http://maven.xpand-it.com/artifactory/libs-snapshots-local</url>
+        </snapshotRepository>
+   </distributionManagement>
+    
+    
+    <build>
+        <plugins>
+
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <debug>true</debug>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <compilerArgs>
+                        <!-- this flag is required in order to obtain the name of parameters in test methods -->
+                        <arg>-parameters</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>2.8.2</version>
+                <executions>
+                    <execution>
+                        <id>default-deploy</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>deploy</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.3</version>
+                <configuration>
+                    <localCheckout>true</localCheckout>
+                    <pushChanges>false</pushChanges>
+                    <mavenExecutorId>forked-path</mavenExecutorId>
+                    <arguments>-Dgpg.passphrase=${gpg.passphrase}</arguments>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.maven.scm</groupId>
+                        <artifactId>maven-scm-provider-gitexe</artifactId>
+                        <version>1.9.5</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+     
+ 
+             <plugin>
+                 <groupId>org.apache.maven.plugins</groupId>
+                 <artifactId>maven-source-plugin</artifactId>
+                 <version>3.0.1</version>
+                 <executions>
+                     <execution>
+                         <id>attach-sources</id>
+                         <goals>
+                             <goal>jar</goal>
+                         </goals>
+                     </execution>
+                 </executions>
+             </plugin>
+ 
+ 
+             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.1</version>
+                <configuration>
+                    <testFailureIgnore>true</testFailureIgnore>
+                    <disableXmlReport>true</disableXmlReport>
+                    <useFile>false</useFile>
+                </configuration>
+                <!--
+                <dependencies>
+                    <dependency>
+                      <groupId>org.apache.maven.surefire</groupId>
+                      <artifactId>surefire-junit-platform</artifactId>
+                      <version>3.0.0-M5</version>
+                    </dependency>
+                </dependencies>
+                -->
+            </plugin>
+
+        </plugins>
+    </build>
+  
+  
+</project>
