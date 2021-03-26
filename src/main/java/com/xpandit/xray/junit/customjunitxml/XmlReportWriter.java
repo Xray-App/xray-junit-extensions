@@ -13,54 +13,37 @@ package com.xpandit.xray.junit.customjunitxml;
 import com.xpandit.xray.junit.customjunitxml.XmlReportWriter.AggregatedTestResult.Type;
 import com.xpandit.xray.junit.customjunitxml.annotations.Requirement;
 import com.xpandit.xray.junit.customjunitxml.annotations.XrayTest;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import static java.text.MessageFormat.format;
-import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-import static java.util.Collections.emptyList;
-import static java.util.Comparator.naturalOrder;
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.counting;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.mapping;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
-import java.util.stream.Stream;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.TestFactory;
-import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.TestTemplateInvocationContext;
-import org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor;
-import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
 import org.junit.platform.commons.support.AnnotationSupport;
-import static org.junit.platform.commons.util.ExceptionUtils.readStackTrace;
-import org.junit.platform.commons.util.ReflectionUtils;
-import static org.junit.platform.commons.util.StringUtils.isNotBlank;
-import static org.junit.platform.engine.TestExecutionResult.Status.FAILED;
+import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.TestSource;
-import org.junit.platform.engine.support.descriptor.ClassSource;
+import org.junit.platform.engine.TestTag;
+import org.junit.platform.engine.reporting.ReportEntry;
 import org.junit.platform.engine.support.descriptor.MethodSource;
-import static org.junit.platform.launcher.LauncherConstants.STDERR_REPORT_ENTRY_KEY;
-import static org.junit.platform.launcher.LauncherConstants.STDOUT_REPORT_ENTRY_KEY;
-import static com.xpandit.xray.junit.customjunitxml.XmlReportWriter.AggregatedTestResult.Type.ERROR;
-import static com.xpandit.xray.junit.customjunitxml.XmlReportWriter.AggregatedTestResult.Type.FAILURE;
-import static com.xpandit.xray.junit.customjunitxml.XmlReportWriter.AggregatedTestResult.Type.SKIPPED;
-import static com.xpandit.xray.junit.customjunitxml.XmlReportWriter.AggregatedTestResult.Type.SUCCESS;
+import org.junit.platform.launcher.TestIdentifier;
+import org.junit.platform.launcher.TestPlan;
+import org.junit.platform.reporting.legacy.LegacyReportingUtils;
 
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+import java.io.File;
 import java.io.Writer;
+import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.NumberFormat;
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -73,25 +56,28 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
-import java.util.Set;
 import java.util.stream.Collectors;
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Base64;
-import java.util.Base64.Encoder;
+import java.util.stream.Stream;
 
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
-
-import org.junit.platform.engine.TestExecutionResult;
-import org.junit.platform.engine.reporting.ReportEntry;
-import org.junit.platform.launcher.TestIdentifier;
-import org.junit.platform.launcher.TestPlan;
-import org.junit.platform.reporting.legacy.LegacyReportingUtils;
-import org.junit.platform.engine.TestTag;
-import org.junit.jupiter.api.extension.TestTemplateInvocationContext;
+import static com.xpandit.xray.junit.customjunitxml.XmlReportWriter.AggregatedTestResult.Type.ERROR;
+import static com.xpandit.xray.junit.customjunitxml.XmlReportWriter.AggregatedTestResult.Type.FAILURE;
+import static com.xpandit.xray.junit.customjunitxml.XmlReportWriter.AggregatedTestResult.Type.SKIPPED;
+import static com.xpandit.xray.junit.customjunitxml.XmlReportWriter.AggregatedTestResult.Type.SUCCESS;
+import static java.text.MessageFormat.format;
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+import static java.util.Collections.emptyList;
+import static java.util.Comparator.naturalOrder;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.counting;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static org.junit.platform.commons.util.ExceptionUtils.readStackTrace;
+import static org.junit.platform.commons.util.StringUtils.isNotBlank;
+import static org.junit.platform.engine.TestExecutionResult.Status.FAILED;
+import static org.junit.platform.launcher.LauncherConstants.STDERR_REPORT_ENTRY_KEY;
+import static org.junit.platform.launcher.LauncherConstants.STDOUT_REPORT_ENTRY_KEY;
 
 /**
  * {@code XmlReportWriter} writes an XML report whose format is compatible with
@@ -206,25 +192,6 @@ class XmlReportWriter {
 		newLine(writer);
 	}
 
-	private Optional<Class<?>> getTestClass(final TestSource source) {
-		if (source instanceof MethodSource) {
-			return getTestClass(((MethodSource) source).getClassName());
-		}
-		if (source instanceof ClassSource) {
-			return Optional.of(((ClassSource) source).getJavaClass());
-		}
-		return Optional.empty();
-	}
-
-	private Optional<Class<?>> getTestClass(final String className) {
-		try {
-			return Optional.of(Class.forName(className));
-		} catch (ClassNotFoundException e) {
-			logger.error(e, () -> "Could not get test class from test source " + className);
-		}
-		return Optional.empty();
-	}
-
 	private Optional<Method> getTestMethod(final TestSource source) {
 		if (source instanceof MethodSource) {
 			return getTestMethod((MethodSource) source);
@@ -243,19 +210,19 @@ class XmlReportWriter {
 		return Optional.empty();
 	}
 
-	private HashMap<String, String> getTestRunCustomFields(List<ReportEntry> entries) {
-		HashMap<String, String> hash = new HashMap<>();
+	private Map<String, String> getTestRunCustomFields(List<ReportEntry> entries) {
+		HashMap<String, String> testRunCustomFields = new HashMap<>();
 
 		if (!entries.isEmpty()) {
-			for (int i = 0; i < entries.size(); i++) {
-				ReportEntry reportEntry = entries.get(i);
-				Map<String, String> testrunCustomFields = reportEntry.getKeyValuePairs().entrySet().stream().filter(
-						mapItem -> ((String) mapItem.getKey()).startsWith(XrayTestReporter.TESTRUN_CUSTOMFIELD_PREFIX))
-						.collect(Collectors.toMap(map -> ((String) map.getKey()).substring(5), map -> map.getValue()));
-				hash.putAll(testrunCustomFields);
+			for (ReportEntry reportEntry : entries) {
+				Map<String, String> entryTestRunCustomFields = reportEntry.getKeyValuePairs().entrySet()
+																	 .stream()
+																	 .filter(mapItem -> mapItem.getKey().startsWith(XrayTestReporter.TESTRUN_CUSTOMFIELD_PREFIX))
+																	 .collect(Collectors.toMap(map -> (map.getKey()).substring(5), Entry::getValue));
+				testRunCustomFields.putAll(entryTestRunCustomFields);
 			}
 		}
-		return hash;
+		return testRunCustomFields;
 	}
 
 	private void writeTestcase(TestIdentifier testIdentifier, AggregatedTestResult testResult,
@@ -325,7 +292,6 @@ class XmlReportWriter {
 			}
 		}
 
-		Optional<ParameterizedTest> paramterizedTest = AnnotationSupport.findAnnotation(testMethod, ParameterizedTest.class);
 		Optional<TestFactory> dynamicTest = AnnotationSupport.findAnnotation(testMethod, TestFactory.class);
 		Optional<DisplayName> displayName = AnnotationSupport.findAnnotation(testMethod, DisplayName.class);
 		if ( ((test_summary == null) || (test_summary.isEmpty())) && (displayName.isPresent()) ) {
@@ -351,9 +317,9 @@ class XmlReportWriter {
 		// System.out.println("xargs.len: " + args.length);
 
 		List<ReportEntry> entries = this.reportData.getReportEntries(testIdentifier);
-		HashMap<String, String> testrunCustomFields = getTestRunCustomFields(entries);
-		for (Map.Entry customField : testrunCustomFields.entrySet()) {
-			addProperty(writer, (String) customField.getKey(), (String) customField.getValue());
+		Map<String, String> testrunCustomFields = getTestRunCustomFields(entries);
+		for (Map.Entry<String, String> customField : testrunCustomFields.entrySet()) {
+			addProperty(writer, customField.getKey(), customField.getValue());
 		}
 
 		if (!entries.isEmpty()) {
@@ -361,12 +327,11 @@ class XmlReportWriter {
 			writeAttributeSafely(writer, "name", "testrun_evidence");
 			newLine(writer);
 
-			for (int i = 0; i < entries.size(); i++) {
-				ReportEntry reportEntry = entries.get(i);
-
+			for (ReportEntry reportEntry : entries) {
 				List<String> files = reportEntry.getKeyValuePairs().entrySet().stream()
-						.filter(mapItem -> ((String) mapItem.getKey()).equals(XrayTestReporter.TESTRUN_EVIDENCE))
-						.map(item -> item.getValue()).collect(Collectors.toList());
+												.filter(mapItem -> mapItem.getKey()
+																		  .equals(XrayTestReporter.TESTRUN_EVIDENCE))
+												.map(Entry::getValue).collect(Collectors.toList());
 
 				Base64.Encoder enc = Base64.getEncoder();
 				for (String file : files) {
@@ -422,8 +387,7 @@ class XmlReportWriter {
 		if (pos > 0) {
 			return legacyName.substring(0, pos);
 		} else {
-			return legacyName.substring(0, -1);
-			// return legacyName;
+			return legacyName;
 		}
 	}
 
@@ -507,18 +471,20 @@ class XmlReportWriter {
 	private void collectReportEntriesFor(TestIdentifier testIdentifier, String entryName, List<String> elements) {
 		List<ReportEntry> entries = this.reportData.getReportEntries(testIdentifier);
 		if (!entries.isEmpty()) {
-			for (int i = 0; i < entries.size(); i++) {
-				ReportEntry reportEntry = entries.get(i);
-				List<String> tempComments = reportEntry.getKeyValuePairs().entrySet().stream()
-						.filter(mapItem -> ((String) mapItem.getKey()).equals(entryName)).map(item -> item.getValue())
-						.collect(Collectors.toList());
+			for (ReportEntry reportEntry : entries) {
+				List<String> tempComments = reportEntry.getKeyValuePairs()
+													   .entrySet()
+													   .stream()
+													   .filter(mapItem -> mapItem.getKey().equals(entryName))
+													   .map(Entry::getValue)
+													   .collect(Collectors.toList());
 				elements.addAll(tempComments);
 			}
 		}
 	}
 
 	private void removeXrayKeys(Map<String, String> keyValuePairs) {
-		keyValuePairs.entrySet().removeIf(entry -> ((String) entry.getKey()).startsWith(XrayTestReporter.XRAY_PREFIX));
+		keyValuePairs.entrySet().removeIf(entry -> entry.getKey().startsWith(XrayTestReporter.XRAY_PREFIX));
 	}
 
 	private void removeIfPresentAndAddAsSeparateElement(Map<String, String> keyValuePairs, String key,

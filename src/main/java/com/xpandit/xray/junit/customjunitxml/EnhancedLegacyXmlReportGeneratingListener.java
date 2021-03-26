@@ -10,34 +10,23 @@
 
 package com.xpandit.xray.junit.customjunitxml;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Writer;
-import java.lang.reflect.Method;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.Clock;
-
-import java.util.Optional;
-import java.util.stream.Stream;
-import javax.xml.stream.XMLStreamException;
-import java.util.Set;
-
-import org.apiguardian.api.API;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
-import org.junit.platform.commons.support.AnnotationSupport;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.reporting.ReportEntry;
-import org.junit.platform.engine.support.descriptor.ClassSource;
-import org.junit.platform.engine.support.descriptor.MethodSource;
 import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
-import org.junit.platform.engine.TestSource;
+
+import javax.xml.stream.XMLStreamException;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Writer;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Clock;
 
 /**
  * {@code EnhancedLegacyXmlReportGeneratingListener} is a
@@ -56,14 +45,21 @@ import org.junit.platform.engine.TestSource;
 
 public class EnhancedLegacyXmlReportGeneratingListener implements TestExecutionListener {
 
+	private static final String DEFAULT_REPORTS_DIR = "./reports";
+	private static final Logger logger = LoggerFactory.getLogger(EnhancedLegacyXmlReportGeneratingListener.class);
+
 	private final Path reportsDir;
 	private final PrintWriter out;
 	private final Clock clock;
 
 	private XmlReportData reportData;
 
-	public static final String DEFAULT_REPORTS_DIR = "./reports";
-	private static final Logger logger = LoggerFactory.getLogger(EnhancedLegacyXmlReportGeneratingListener.class);
+	// For tests only
+	EnhancedLegacyXmlReportGeneratingListener(Path reportsDir, PrintWriter out, Clock clock) {
+		this.reportsDir = reportsDir;
+		this.out = out;
+		this.clock = clock;
+	}
 
 	public EnhancedLegacyXmlReportGeneratingListener() {
 		this(FileSystems.getDefault().getPath(DEFAULT_REPORTS_DIR), new PrintWriter(System.out, true),
@@ -72,13 +68,6 @@ public class EnhancedLegacyXmlReportGeneratingListener implements TestExecutionL
 
 	public EnhancedLegacyXmlReportGeneratingListener(Path reportsDir, PrintWriter out) {
 		this(reportsDir, out, Clock.systemDefaultZone());
-	}
-
-	// For tests only
-	public EnhancedLegacyXmlReportGeneratingListener(Path reportsDir, PrintWriter out, Clock clock) {
-		this.reportsDir = reportsDir;
-		this.out = out;
-		this.clock = clock;
 	}
 
 	@Override
