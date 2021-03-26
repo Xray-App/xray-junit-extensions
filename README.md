@@ -1,5 +1,8 @@
 # xray-junit-extensions
 
+![build workflow](https://github.com/bitcoder/xray-junit-extensions/actions/workflows/CI.yml/badge.svg)
+[![Known Vulnerabilities](https://snyk.io/test/github/bitcoder/xray-junit-extensions/badge.svg)](https://snyk.io/test/github/bitcoder/xray-junit-extensions)
+
 This repo contains several improvements for [JUnit](https://junit.org/junit5/) that allow you to take better advantage of JUnit 5 (juniperwhenever using it together with [Xray Test Management](https://getxray.app).
 This code is provided as-is; you're free to use it and modify it at your will (see license ahead).
 
@@ -35,20 +38,19 @@ The project consists of:
 
 Configure the maven repository in your pom.xml:
 
-```
+```xml
         <repository>
-                <id>xpandit</id>
-                <name>xpand-releases</name>
-                <url>http://maven.xpand-it.com/artifactory/releases</url>
-                <releases>
-                        <enabled>true</enabled>
-                </releases>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/bitcoder/*</url>
+            <snapshots>
+              <enabled>true</enabled>
+            </snapshots>
         </repository>
-```        
+```
 
 Add the following dependency to your pom.xml:
 
-```
+```xml
         <dependency>
           <groupId>com.xpandit.xray</groupId>
           <artifactId>xray-junit-extensions</artifactId>
