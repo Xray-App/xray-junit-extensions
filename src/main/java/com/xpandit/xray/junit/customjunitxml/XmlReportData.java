@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import org.junit.platform.commons.util.ExceptionUtils;
@@ -31,12 +32,8 @@ import org.junit.platform.engine.reporting.ReportEntry;
 import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
 
-/**
- * @since 1.4
- */
-class XmlReportData {
 
-	private static final int MILLIS_PER_SECOND = 1000;
+class XmlReportData {
 
 	private final Map<TestIdentifier, TestExecutionResult> finishedTests = new ConcurrentHashMap<>();
 	private final Map<TestIdentifier, String> skippedTests = new ConcurrentHashMap<>();
@@ -90,7 +87,7 @@ class XmlReportData {
 	double getDurationInSeconds(TestIdentifier testIdentifier) {
 		Instant startInstant = getStartInstant(testIdentifier);
 		Instant endInstant = getEndInstant(testIdentifier);
-		return Duration.between(startInstant, endInstant).toMillis() / (double) MILLIS_PER_SECOND;
+		return TimeUnit.MILLISECONDS.toSeconds(Duration.between(startInstant, endInstant).toMillis());
 	}
 
 	Instant getStartInstant(TestIdentifier testIdentifier) {
@@ -102,19 +99,22 @@ class XmlReportData {
 	}
 
 	String getSkipReason(TestIdentifier testIdentifier) {
-		return findSkippedAncestor(testIdentifier).map(skippedTestIdentifier -> {
-			String reason = this.skippedTests.get(skippedTestIdentifier);
-			if (!testIdentifier.equals(skippedTestIdentifier)) {
-				reason = "parent was skipped: " + reason;
-			}
-			return reason;
-		}).orElse(null);
+		return findSkippedAncestor(testIdentifier)
+				.map(skippedTestIdentifier -> {
+					String reason = this.skippedTests.get(skippedTestIdentifier);
+					if (!testIdentifier.equals(skippedTestIdentifier)) {
+						reason = "parent was skipped: '" + reason + "'";
+					}
+
+					return reason;
+				})
+				.orElse(null);
 	}
 
 	List<TestExecutionResult> getResults(TestIdentifier testIdentifier) {
-		return getAncestors(testIdentifier).stream() //
-				.map(this.finishedTests::get) //
-				.filter(Objects::nonNull) //
+		return getAncestors(testIdentifier).stream()
+				.map(this.finishedTests::get)
+				.filter(Objects::nonNull)
 				.collect(toList());
 	}
 

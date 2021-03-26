@@ -12,14 +12,14 @@ package com.xpandit.xray.junit.customjunitxml;
 
 public interface XrayTestReporter {
 
-    static final String XRAY_PREFIX = "xray:";
-    static final String TESTRUN_COMMENT = "xray:comment";
-    static final String TESTRUN_EVIDENCE = "xray:evidence";
-    static final String TESTRUN_CUSTOMFIELD_PREFIX = "xray:testrun_customfield:";
+    String XRAY_PREFIX = "xray:";
+    String TESTRUN_COMMENT = "xray:comment";
+    String TESTRUN_EVIDENCE = "xray:evidence";
+    String TESTRUN_CUSTOMFIELD_PREFIX = "xray:testrun_customfield:";
 
-    public void addComment(String comment);
+    void addComment(String comment);
 
-    public void setTestRunCustomField(String field, String value);
+    void setTestRunCustomField(String field, String value);
 
-    public void addTestRunEvidence(String filepath);
+    void addTestRunEvidence(String filepath);
 }

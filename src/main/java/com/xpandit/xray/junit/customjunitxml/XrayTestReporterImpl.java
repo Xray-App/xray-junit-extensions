@@ -14,7 +14,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 public class XrayTestReporterImpl implements XrayTestReporter {
 
-    private ExtensionContext extensionContext;
+    private final ExtensionContext extensionContext;
 
     public XrayTestReporterImpl(ExtensionContext extensionContext) {
         this.extensionContext = extensionContext;
