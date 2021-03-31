@@ -1,6 +1,5 @@
 package com.xpandit.xray.junit.customjunitxml;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
@@ -27,6 +26,12 @@ public class XrayEnabledTestExamples {
 
     @Test
     public void legacyTest() {
+    }
+
+    @Test
+    public void testWithTestRunComment(XrayTestReporter xrayReporter) {
+        xrayReporter.addComment("hello");
+
     }
 
     @Test

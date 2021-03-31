@@ -11,55 +11,21 @@
 
 package com.xpandit.xray.junit.customjunitxml;
 
-//import org.junit.Test;
-import org.junit.jupiter.api.Test;
-import org.joox.Match;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.io.TempDir;
-import org.junit.platform.engine.DiscoverySelector;
-import org.junit.platform.engine.TestDescriptor;
-import org.junit.platform.engine.TestEngine;
-import org.junit.platform.engine.UniqueId;
-import org.junit.platform.engine.discovery.DiscoverySelectors;
-import org.junit.platform.launcher.Launcher;
-import org.junit.platform.launcher.LauncherDiscoveryRequest;
-import org.junit.platform.launcher.TestExecutionListener;
-import org.junit.platform.launcher.core.LauncherConfig;
-import org.junit.platform.launcher.core.LauncherFactory;
-import org.junit.platform.testkit.engine.EngineExecutionResults;
-import org.junit.platform.testkit.engine.EngineTestKit;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
+import static org.joox.JOOX.$;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.junit.platform.engine.TestExecutionResult.successful;
-import static org.junit.platform.engine.discovery.DiscoverySelectors.selectUniqueId;
-import static org.junit.platform.launcher.LauncherConstants.CAPTURE_STDERR_PROPERTY_NAME;
-import static org.junit.platform.launcher.LauncherConstants.CAPTURE_STDOUT_PROPERTY_NAME;
-import static org.junit.platform.launcher.LauncherConstants.STDERR_REPORT_ENTRY_KEY;
-import static org.junit.platform.launcher.LauncherConstants.STDOUT_REPORT_ENTRY_KEY;
+import static org.junit.platform.engine.discovery.DiscoverySelectors.selectMethod;
 import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.request;
-
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 
 import java.io.BufferedReader;
 import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.lang.reflect.Method;
+import java.net.URL;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -69,13 +35,27 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Base64;
-import java.util.Collections;
-import java.util.List;
 
-import com.xpandit.xray.junit.customjunitxml.EnhancedLegacyXmlReportGeneratingListener;
-import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
-import static org.junit.platform.engine.discovery.DiscoverySelectors.selectMethod;
-import static org.joox.JOOX.$;
+import javax.xml.XMLConstants;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
+
+import org.joox.Match;
+//import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.platform.engine.reporting.ReportEntry;
+import org.junit.platform.launcher.Launcher;
+import org.junit.platform.launcher.LauncherDiscoveryRequest;
+import org.junit.platform.launcher.TestIdentifier;
+import org.junit.platform.launcher.TestPlan;
+import org.junit.platform.launcher.core.LauncherFactory;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 public class EnhancedLegacyXmlTest {
 
@@ -151,6 +131,8 @@ public class EnhancedLegacyXmlTest {
     public void shouldMapXrayTestSummaryToTestcaseProperty() throws Exception {
         String testMethodName = "annotatedXrayTestWithSummary";
         executeTestMethod(TEST_EXAMPLES_CLASS, testMethodName);
+        //System.out.println(tempDirectory.resolve(REPORT_NAME));
+        //Thread.sleep(10000);
         Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
         Match testcase = testsuite.child("testcase");
         assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
@@ -162,6 +144,8 @@ public class EnhancedLegacyXmlTest {
     public void shouldMapXrayTestDescriptionToTestcaseProperty() throws Exception {
         String testMethodName = "annotatedXrayTestWithDescription";
         executeTestMethod(TEST_EXAMPLES_CLASS, testMethodName);
+        //System.out.println(tempDirectory.resolve(REPORT_NAME));
+        //Thread.sleep(10000);
         Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
         Match testcase = testsuite.child("testcase");
         assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
@@ -300,9 +284,71 @@ public class EnhancedLegacyXmlTest {
     }
 
     @Test
+    public void shouldCreateReportEntryForAComment() throws Exception {
+        String testMethodName = "testWithTestRunComment";
+        LauncherDiscoveryRequest discoveryRequest = request()//
+                .selectors(selectMethod(TEST_EXAMPLES_CLASS, testMethodName, "com.xpandit.xray.junit.customjunitxml.XrayTestReporter"))
+                .build();
+        Launcher launcher = LauncherFactory.create();
+
+        EnhancedLegacyXmlReportGeneratingListener listener = mock(EnhancedLegacyXmlReportGeneratingListener.class);
+        //EnhancedLegacyXmlReportGeneratingListener listener = new EnhancedLegacyXmlReportGeneratingListener(tempDirectory, new PrintWriter(System.out));
+        launcher.execute(discoveryRequest, listener);    
+
+        ArgumentCaptor<TestPlan> testPlanArgumentCaptor = ArgumentCaptor.forClass(TestPlan.class);
+		InOrder inOrder = inOrder(listener);
+		inOrder.verify(listener).testPlanExecutionStarted(testPlanArgumentCaptor.capture());
+		TestPlan testPlan = testPlanArgumentCaptor.getValue();
+		//TestIdentifier testIdentifier = testPlan.getTestIdentifier("test.getUniqueId().toString()");
+
+        ArgumentCaptor<ReportEntry> reportEntryArgumentCaptor = ArgumentCaptor.forClass(ReportEntry.class);
+		//inOrder.verify(listener).reportingEntryPublished(same(testIdentifier), reportEntryArgumentCaptor.capture());
+        inOrder.verify(listener, times(1)).reportingEntryPublished(any(TestIdentifier.class), reportEntryArgumentCaptor.capture());
+		//Mockito.verify(listener).executionFinished(testIdentifier, successful());
+		ReportEntry reportEntry = reportEntryArgumentCaptor.getValue();
+		assertThat(reportEntry.getKeyValuePairs()).containsExactly(entry("xray:comment", "hello"));
+    }
+
+    @Test
+    public void shouldCreateReportEntryForComments() throws Exception {
+        String testMethodName = "testWithTestRunComments";
+        LauncherDiscoveryRequest discoveryRequest = request()
+                .selectors(selectMethod(TEST_EXAMPLES_CLASS, testMethodName, "com.xpandit.xray.junit.customjunitxml.XrayTestReporter"))
+                .build();
+        Launcher launcher = LauncherFactory.create();
+
+        EnhancedLegacyXmlReportGeneratingListener listener = mock(EnhancedLegacyXmlReportGeneratingListener.class);
+        launcher.execute(discoveryRequest, listener);    
+
+        ArgumentCaptor<TestPlan> testPlanArgumentCaptor = ArgumentCaptor.forClass(TestPlan.class);
+		InOrder inOrder = inOrder(listener);
+		inOrder.verify(listener).testPlanExecutionStarted(testPlanArgumentCaptor.capture());
+		TestPlan testPlan = testPlanArgumentCaptor.getValue();
+		//TestIdentifier testIdentifier = testPlan.getTestIdentifier("test.getUniqueId().toString()");
+
+        ArgumentCaptor<ReportEntry> reportEntryArgumentCaptor = ArgumentCaptor.forClass(ReportEntry.class);
+		//inOrder.verify(listener).reportingEntryPublished(same(testIdentifier), reportEntryArgumentCaptor.capture());
+        inOrder.verify(listener, times(2)).reportingEntryPublished(any(TestIdentifier.class), reportEntryArgumentCaptor.capture());
+		//Mockito.verify(listener).executionFinished(testIdentifier, successful());
+		//ReportEntry reportEntry = reportEntryArgumentCaptor.getValue();
+		//assertThat(reportEntry.getKeyValuePairs()).containsExactly(entry("xray:comment", "hellso"));//, entry("xray:comment", "world"));
+
+
+        //List<Map<String,String>> entries = reportEntryArgumentCaptor.getAllValues().stream().flatMap(reportEntry -> reportEntry.getKeyValuePairs()).collect(Collectors.toList());
+        //assertThat(entries).containsExactly(entry("xray:comment", "hello"), entry("xray:comment", "world"));
+
+        assertThat(reportEntryArgumentCaptor.getAllValues().get(0).getKeyValuePairs()).containsExactly(entry("xray:comment", "hello"));
+        assertThat(reportEntryArgumentCaptor.getAllValues().get(1).getKeyValuePairs()).containsExactly(entry("xray:comment", "world"));
+    }
+
+
+
+    @Test
     public void shouldStoreTestRunCommentsToTestcaseProperty() throws Exception {
         String testMethodName = "testWithTestRunComments";
         executeTestMethodWithParams(TEST_EXAMPLES_CLASS, testMethodName, "com.xpandit.xray.junit.customjunitxml.XrayTestReporter");
+        //System.out.println(tempDirectory.resolve(REPORT_NAME));
+        //Thread.sleep(10000);
         Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
         Match testcase = testsuite.child("testcase");
         assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
@@ -318,6 +364,24 @@ public class EnhancedLegacyXmlTest {
         assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
         assertThat(testcase.child("properties").children("property").matchAttr("name", "testrun_customfield:cf1").attr("value")).isEqualTo("field1_value");
         assertThat(testcase.child("properties").children("property").matchAttr("name", "testrun_customfield:cf2").attr("value")).isEqualTo("field2_value");
+    }
+
+    @Test
+    public void shouldCreateReportEntryForCustomFields() throws Exception {
+        String testMethodName = "testWithTestRunCustomFields";
+        LauncherDiscoveryRequest discoveryRequest = request()
+                .selectors(selectMethod(TEST_EXAMPLES_CLASS, testMethodName, "com.xpandit.xray.junit.customjunitxml.XrayTestReporter"))
+                .build();
+        Launcher launcher = LauncherFactory.create();
+
+        EnhancedLegacyXmlReportGeneratingListener listener = mock(EnhancedLegacyXmlReportGeneratingListener.class);
+        launcher.execute(discoveryRequest, listener);    
+
+		InOrder inOrder = inOrder(listener);
+        ArgumentCaptor<ReportEntry> reportEntryArgumentCaptor = ArgumentCaptor.forClass(ReportEntry.class);
+        inOrder.verify(listener, times(2)).reportingEntryPublished(any(TestIdentifier.class), reportEntryArgumentCaptor.capture());
+        assertThat(reportEntryArgumentCaptor.getAllValues().get(0).getKeyValuePairs()).containsExactly(entry("xray:testrun_customfield:cf1", "field1_value"));
+        assertThat(reportEntryArgumentCaptor.getAllValues().get(1).getKeyValuePairs()).containsExactly(entry("xray:testrun_customfield:cf2", "field2_value"));
     }
 
     @Test
@@ -340,12 +404,62 @@ public class EnhancedLegacyXmlTest {
     }
 
  
+    @Test
+    public void shouldCreateReportEntryForEvidence() throws Exception {
+        String testMethodName = "testWithTestRunEvidence";
+        LauncherDiscoveryRequest discoveryRequest = request()
+                .selectors(selectMethod(TEST_EXAMPLES_CLASS, testMethodName, "com.xpandit.xray.junit.customjunitxml.XrayTestReporter"))
+                .build();
+        Launcher launcher = LauncherFactory.create();
+
+        EnhancedLegacyXmlReportGeneratingListener listener = mock(EnhancedLegacyXmlReportGeneratingListener.class);
+        launcher.execute(discoveryRequest, listener);    
+
+		InOrder inOrder = inOrder(listener);
+        ArgumentCaptor<ReportEntry> reportEntryArgumentCaptor = ArgumentCaptor.forClass(ReportEntry.class);
+        inOrder.verify(listener, times(1)).reportingEntryPublished(any(TestIdentifier.class), reportEntryArgumentCaptor.capture());
+        assertThat(reportEntryArgumentCaptor.getAllValues().get(0).getKeyValuePairs()).containsExactly(entry("xray:evidence", FileSystems.getDefault().getPath("src/test/java/com/xpandit/xray/junit/customjunitxml/xray.png").toAbsolutePath().toString()));
+    }
 
 	private Match readValidXmlFile(Path xmlFile) throws Exception {
 		assertTrue(Files.exists(xmlFile), () -> "File does not exist: " + xmlFile);
 		try (BufferedReader reader = Files.newBufferedReader(xmlFile)) {
 			Match xml = $(reader);
+            assertValidAccordingToJenkinsSchema(xml.document());
 			return xml;
+		}
+	}
+
+	static void assertValidAccordingToJenkinsSchema(Document document) throws Exception {
+		try {
+			// Schema is thread-safe, Validator is not
+			Validator validator = CachedSchema.JENKINS.newValidator();
+			validator.validate(new DOMSource(document));
+		}
+		catch (Exception e) {
+			fail("Invalid XML document: " + document, e);
+		}
+	}
+
+	private enum CachedSchema {
+
+		JENKINS("/enhanced-jenkins-junit.xsd");
+
+		private final Schema schema;
+
+		CachedSchema(String resourcePath) {
+			URL schemaFile = EnhancedLegacyXmlReportGeneratingListener.class.getResource(resourcePath);
+			SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+			try {
+				this.schema = schemaFactory.newSchema(schemaFile);
+			}
+			catch (SAXException e) {
+				throw new RuntimeException("Failed to create schema using " + schemaFile, e);
+			}
+		}
+
+		Validator newValidator() {
+			return schema.newValidator();
 		}
 	}
 
