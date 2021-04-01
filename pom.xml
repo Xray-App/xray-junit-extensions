@@ -4,7 +4,7 @@
     <groupId>com.xpandit.xray</groupId>
     <artifactId>xray-junit-extensions</artifactId>
     <packaging>jar</packaging>
-    <version>0.1.0</version>
+    <version>0.2.0</version>
     <name>xray-junit-extensions</name>
     <url>http://maven.apache.org</url>
     <properties>
