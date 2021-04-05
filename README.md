@@ -65,6 +65,19 @@ Add the following dependency to your pom.xml:
         </dependency>
 ```
 
+In your `.m2/settings.xml`, configure the authentication for the maven repository.
+
+```xml
+ <servers>
+    <server>
+      <id>github</id>
+      <username>GITHUB_USERNAME</username>
+      <password>GITHUB_PERSONAL_TOKEN</password>
+    </server>
+    ...
+</servers>
+```
+
 ## How to use
 
 In order to generate the enhanced, customized JUnit XML report we need to register the **EnhancedLegacyXmlReportGeneratingListener** listener. This can be done in [several ways](https://junit.org/junit5/docs/current/user-guide/#launcher-api-listeners-custom):
