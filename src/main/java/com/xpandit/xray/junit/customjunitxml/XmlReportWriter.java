@@ -218,7 +218,7 @@ class XmlReportWriter {
 				Map<String, String> entryTestRunCustomFields = reportEntry.getKeyValuePairs().entrySet()
 																	 .stream()
 																	 .filter(mapItem -> mapItem.getKey().startsWith(XrayTestReporter.TESTRUN_CUSTOMFIELD_PREFIX))
-																	 .collect(Collectors.toMap(map -> (map.getKey()).substring(5), Entry::getValue));
+																	 .collect(Collectors.toMap(map -> (map.getKey()).substring(25), Entry::getValue));
 				testRunCustomFields.putAll(entryTestRunCustomFields);
 			}
 		}
@@ -318,9 +318,24 @@ class XmlReportWriter {
 
 		List<ReportEntry> entries = this.reportData.getReportEntries(testIdentifier);
 		Map<String, String> testrunCustomFields = getTestRunCustomFields(entries);
-		for (Map.Entry<String, String> customField : testrunCustomFields.entrySet()) {
-			addProperty(writer, customField.getKey(), customField.getValue());
+		//for (Map.Entry<String, String> customField : testrunCustomFields.entrySet()) {
+		//	addProperty(writer, customField.getKey(), customField.getValue());
+		//}
+
+
+		if (!testrunCustomFields.isEmpty()) {
+			writer.writeStartElement("property");
+			writeAttributeSafely(writer, "name", "testrun_customfields");
+			newLine(writer);
+
+			for (Map.Entry<String, String> customField : testrunCustomFields.entrySet()) {
+				addItem(writer, customField.getKey(), customField.getValue());
+			}
+
+			writer.writeEndElement(); // property testrun_customfields
+			newLine(writer);
 		}
+
 
 		if (!entries.isEmpty()) {
 			writer.writeStartElement("property");
@@ -339,7 +354,7 @@ class XmlReportWriter {
 						byte[] fileContent = Files.readAllBytes(Paths.get(file));
 						byte[] encoded = enc.encode(fileContent);
 						String encodedStr = new String(encoded, "UTF-8");
-						addEvidence(writer, new File(file).getName(), encodedStr);
+						addItem(writer, new File(file).getName(), encodedStr);
 					} catch (Exception e) {
 						logger.error(e, () -> "error encoding evidence " + file);
 					}
@@ -373,7 +388,7 @@ class XmlReportWriter {
 		newLine(writer);
 	}
 
-	private void addEvidence(XMLStreamWriter writer, String name, String content) throws XMLStreamException {
+	private void addItem(XMLStreamWriter writer, String name, String content) throws XMLStreamException {
 		writer.writeStartElement("item");
 		writeAttributeSafely(writer, "name", name);
 		writer.writeCharacters(content);

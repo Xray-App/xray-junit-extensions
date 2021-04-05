@@ -362,8 +362,17 @@ public class EnhancedLegacyXmlTest {
         Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
         Match testcase = testsuite.child("testcase");
         assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "testrun_customfield:cf1").attr("value")).isEqualTo("field1_value");
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "testrun_customfield:cf2").attr("value")).isEqualTo("field2_value");
+
+/*
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "testrun_customfields").children("item").get(0).getAttribute("name")).isEqualTo("cf2");
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "testrun_customfields").children("item").get(0).getTextContent()).isEqualTo("field2_value");
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "testrun_customfields").children("item").get(1).getAttribute("name")).isEqualTo("cf1");
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "testrun_customfields").children("item").get(1).getTextContent()).isEqualTo("field1_value");
+*/
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "testrun_customfields").children("item").matchAttr("name", "cf1")).isNotEmpty();
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "testrun_customfields").children("item").matchAttr("name", "cf1").cdata()).isEqualTo("field1_value");
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "testrun_customfields").children("item").matchAttr("name", "cf2")).isNotEmpty();
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "testrun_customfields").children("item").matchAttr("name", "cf2").cdata()).isEqualTo("field2_value");
     }
 
     @Test
@@ -391,7 +400,7 @@ public class EnhancedLegacyXmlTest {
         Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
         Match testcase = testsuite.child("testcase");
         assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "testrun_evidence").child("item").attr("name")).isEqualTo("xray.png");
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "testrun_evidence").children("item").attr("name")).isEqualTo("xray.png");
 
         String file = "src/test/java/com/xpandit/xray/junit/customjunitxml/xray.png";
         Base64.Encoder enc = Base64.getEncoder();
