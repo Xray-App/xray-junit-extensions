@@ -24,20 +24,14 @@ This way, testers can automate the test script and at the same time provide info
 
 ### Features
 
-- track started and finished date timestamps for each test
-- link a test method to an existing Test issue or use auto-provisioning
 - cover a "requirement" (i.e. an issue in Jira) from a test method
-- specify additional fields for the auto-provisioned Test issues (e.g. summary, description, labels)
-- attach screenshots or any other file as evidence to the Test Run, right from within the test method
-- add comments ot the Test Run, right from within the test method
-- set the values for Test Run custom fields, right from within the test method
 
 ### Main classes
 
 The project consists of:
 
 - **EnhancedLegacyXmlReportGeneratingListener**: a custom TestExecutionListener implementation that is responsible for generating a custom JUnit XML with additional properties Xray can take advantage of
-- **@XrayTest**, **@Requirement**: new, optional annotations to provide additional information whenever writing the automated test methods
+- **@Requirement**: new, optional annotation to provide additional information whenever writing the automated test methods
 - **XrayTestReporterParameterResolver**: a new, optional JUnit 5 extension that provides the means to report additional information to Xray, inside the test method flow
 
 ## Installing
