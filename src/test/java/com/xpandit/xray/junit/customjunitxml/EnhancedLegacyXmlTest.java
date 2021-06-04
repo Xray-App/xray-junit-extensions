@@ -82,7 +82,7 @@ public class EnhancedLegacyXmlTest {
         assertThat(testcase.child("properties").children("property").matchAttr("name", "test_summary")).isEmpty();
         assertThat(testcase.child("properties").children("property").matchAttr("name", "test_description")).isEmpty();
         assertThat(testcase.child("properties").children("property").matchAttr("name", "tags")).isEmpty();
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "requirements")).isEmpty();
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "requirement")).isEmpty();
     }
 
     @Test
@@ -160,18 +160,9 @@ public class EnhancedLegacyXmlTest {
         Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
         Match testcase = testsuite.child("testcase");
         assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "requirements").attr("value")).isEqualTo("CALC-123");
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "requirement").attr("value")).isEqualTo("CALC-123");
     }
 
-    @Test
-    public void shouldMapMultipleRequirementsToTestcaseProperty() throws Exception {
-        String testMethodName = "annotatedWithMultipleRequirements";
-        executeTestMethod(TEST_EXAMPLES_CLASS, testMethodName);
-        Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
-        Match testcase = testsuite.child("testcase");
-        assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "requirements").attr("value")).isEqualTo("CALC-123,CALC-124");
-    }
 
     @Test
     public void shouldMapOneTagToTestcaseProperty() throws Exception {

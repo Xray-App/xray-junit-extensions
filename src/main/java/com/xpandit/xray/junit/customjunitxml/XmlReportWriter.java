@@ -266,7 +266,7 @@ class XmlReportWriter {
 		Optional<Requirement> requirement = AnnotationSupport.findAnnotation(testMethod, Requirement.class);
 		if (requirement.isPresent()) {
 			String[] requirements = requirement.get().value();
-			addProperty(writer, "requirements", String.join(",", requirements));
+			addProperty(writer, "requirement", String.join(",", requirements));
 		}
 
 		Optional<XrayTest> xrayTest = AnnotationSupport.findAnnotation(testMethod, XrayTest.class);
