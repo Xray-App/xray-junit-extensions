@@ -5,10 +5,13 @@
  * made available under the terms of the Eclipse Public License v2.0 which
  * accompanies this distribution and is available at
  *
- * https://www.eclipse.org/legal/epl-v20.html
+ * https://www.eclipse.org/legal/epl-v20.html"
  */
 
 package com.xpandit.xray.junit.customjunitxml;
+
+import java.util.List;
+import java.util.ArrayList;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
 
@@ -26,6 +29,17 @@ public class XrayTestReporterImpl implements XrayTestReporter {
 
     public void setTestRunCustomField(String field, String value) {
         this.extensionContext.publishReportEntry(TESTRUN_CUSTOMFIELD_PREFIX + field, value);
+    }
+
+    public void setTestRunCustomField(String field, String[] values) {
+        ArrayList<String> arrList = new ArrayList<String>();
+        for (int i=0;i<values.length;i++) {
+            String value = values[i];
+            value = value.replaceAll("\\\\", "\\\\\\\\").replaceAll(";", "\\\\;");
+            arrList.add(value);
+        } 
+        String serializedValue =String.join(";", (String [])(arrList.toArray(new String[0])) );
+        this.extensionContext.publishReportEntry(TESTRUN_CUSTOMFIELD_PREFIX + field, serializedValue);
     }
 
     public void addTestRunEvidence(String filepath) {

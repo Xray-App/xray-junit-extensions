@@ -11,6 +11,7 @@
 
 package com.xpandit.xray.junit.customjunitxml;
 
+import java.util.Arrays;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 import static org.joox.JOOX.$;
@@ -348,7 +349,7 @@ public class EnhancedLegacyXmlTest {
 
     @Test
     public void shouldStoreTestRunCustomFieldsToTestcaseProperty() throws Exception {
-        String testMethodName = "testWithTestRunCustomFields";
+        String testMethodName = "testWithStringBasedTestRunCustomFields";
         executeTestMethodWithParams(TEST_EXAMPLES_CLASS, testMethodName, "com.xpandit.xray.junit.customjunitxml.XrayTestReporter");
         Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
         Match testcase = testsuite.child("testcase");
@@ -368,7 +369,7 @@ public class EnhancedLegacyXmlTest {
 
     @Test
     public void shouldCreateReportEntryForCustomFields() throws Exception {
-        String testMethodName = "testWithTestRunCustomFields";
+        String testMethodName = "testWithStringBasedTestRunCustomFields";
         LauncherDiscoveryRequest discoveryRequest = request()
                 .selectors(selectMethod(TEST_EXAMPLES_CLASS, testMethodName, "com.xpandit.xray.junit.customjunitxml.XrayTestReporter"))
                 .build();
@@ -382,6 +383,45 @@ public class EnhancedLegacyXmlTest {
         inOrder.verify(listener, times(2)).reportingEntryPublished(any(TestIdentifier.class), reportEntryArgumentCaptor.capture());
         assertThat(reportEntryArgumentCaptor.getAllValues().get(0).getKeyValuePairs()).containsExactly(entry("xray:testrun_customfield:cf1", "field1_value"));
         assertThat(reportEntryArgumentCaptor.getAllValues().get(1).getKeyValuePairs()).containsExactly(entry("xray:testrun_customfield:cf2", "field2_value"));
+    }
+
+    @Test
+    public void shouldCreateReportEntryForArrayBasedCustomFields() throws Exception {
+        String testMethodName = "testWithArrayBasedTestRunCustomField";
+        LauncherDiscoveryRequest discoveryRequest = request()
+                .selectors(selectMethod(TEST_EXAMPLES_CLASS, testMethodName, "com.xpandit.xray.junit.customjunitxml.XrayTestReporter"))
+                .build();
+        Launcher launcher = LauncherFactory.create();
+
+        EnhancedLegacyXmlReportGeneratingListener listener = mock(EnhancedLegacyXmlReportGeneratingListener.class);
+        launcher.execute(discoveryRequest, listener);    
+
+		InOrder inOrder = inOrder(listener);
+        ArgumentCaptor<ReportEntry> reportEntryArgumentCaptor = ArgumentCaptor.forClass(ReportEntry.class);
+        inOrder.verify(listener, times(1)).reportingEntryPublished(any(TestIdentifier.class), reportEntryArgumentCaptor.capture());
+        assertThat(reportEntryArgumentCaptor.getAllValues().get(0).getKeyValuePairs()).containsExactly(entry("xray:testrun_customfield:cf1", "Porto;Lisbon"));
+    }
+
+    @Test
+    public void shouldStoreArrayBasedTestRunCustomFieldsToTestcaseProperty() throws Exception {
+        String testMethodName = "testWithArrayBasedTestRunCustomField";
+        executeTestMethodWithParams(TEST_EXAMPLES_CLASS, testMethodName, "com.xpandit.xray.junit.customjunitxml.XrayTestReporter");
+        Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
+        Match testcase = testsuite.child("testcase");
+        assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "testrun_customfields").children("item").matchAttr("name", "cf1")).isNotEmpty();
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "testrun_customfields").children("item").matchAttr("name", "cf1").cdata()).isEqualTo("Porto;Lisbon");
+    }
+
+    @Test
+    public void shouldStoreArrayBasedTestRunCustomFieldAndSpecialCharsToTestcaseProperty() throws Exception {
+        String testMethodName = "testWithArrayBasedTestRunCustomFieldAndSpecialChars";
+        executeTestMethodWithParams(TEST_EXAMPLES_CLASS, testMethodName, "com.xpandit.xray.junit.customjunitxml.XrayTestReporter");
+        Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
+        Match testcase = testsuite.child("testcase");
+        assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "testrun_customfields").children("item").matchAttr("name", "cf1")).isNotEmpty();
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "testrun_customfields").children("item").matchAttr("name", "cf1").cdata()).isEqualTo("P\\;orto\\;;Lis\\\\bon\\\\");
     }
 
     @Test

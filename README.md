@@ -180,6 +180,9 @@ public class XrayEnabledTestExamples {
     public void someTest(XrayTestReporter xrayReporter) {
         xrayReporter.addComment("hello");
         xrayReporter.setTestRunCustomField("myTRcustomfield", "field1_value");
+        // you can also set a multiple-value based TR custom field
+        String [] someArr = {"Porto", "Lisbon"};
+        xrayReporter.setTestRunCustomField("multiplevalueTRcustomfield", someArr);
         xrayReporter.addTestRunEvidence("/tmp/screenshot.png");
         xrayReporter.addComment("world");
     }

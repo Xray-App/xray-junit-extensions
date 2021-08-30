@@ -41,9 +41,21 @@ public class XrayEnabledTestExamples {
     }
 
     @Test
-    public void testWithTestRunCustomFields(XrayTestReporter xrayReporter) {
+    public void testWithStringBasedTestRunCustomFields(XrayTestReporter xrayReporter) {
         xrayReporter.setTestRunCustomField("cf1", "field1_value");
         xrayReporter.setTestRunCustomField("cf2", "field2_value");
+    }
+
+    @Test
+    public void testWithArrayBasedTestRunCustomField(XrayTestReporter xrayReporter) {
+        String [] myArr = {"Porto", "Lisbon"};
+        xrayReporter.setTestRunCustomField("cf1", myArr);
+    }
+
+    @Test
+    public void testWithArrayBasedTestRunCustomFieldAndSpecialChars(XrayTestReporter xrayReporter) {
+        String [] myArr = {"P;orto;", "Lis\\bon\\"};
+        xrayReporter.setTestRunCustomField("cf1", myArr);
     }
 
     @Test

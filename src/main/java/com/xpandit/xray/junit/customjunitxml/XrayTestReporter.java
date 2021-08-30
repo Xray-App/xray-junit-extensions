@@ -21,5 +21,7 @@ public interface XrayTestReporter {
 
     void setTestRunCustomField(String field, String value);
 
+    void setTestRunCustomField(String field, String[] values);
+
     void addTestRunEvidence(String filepath);
 }
