@@ -37,7 +37,7 @@ This way, testers can automate the test script and at the same time provide info
 The project consists of:
 
 - **EnhancedLegacyXmlReportGeneratingListener**: a custom TestExecutionListener implementation that is responsible for generating a custom JUnit XML with additional properties Xray can take advantage of
--- **@XrayTest**, **@Requirement**: new, optional annotations to provide additional information whenever writing the automated test methods
+- **@XrayTest**, **@Requirement**: new, optional annotations to provide additional information whenever writing the automated test methods
 - **XrayTestReporterParameterResolver**: a new, optional JUnit 5 extension that provides the means to report additional information to Xray, inside the test method flow
 
 ## Installing
