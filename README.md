@@ -24,7 +24,13 @@ This way, testers can automate the test script and at the same time provide info
 
 ### Features
 
+- track started and finished date timestamps for each test
+- link a test method to an existing Test issue or use auto-provisioning
 - cover a "requirement" (i.e. an issue in Jira) from a test method
+- specify additional fields for the auto-provisioned Test issues (e.g. summary, description, labels)
+- attach screenshots or any other file as evidence to the Test Run, right from within the test method
+- add comments ot the Test Run, right from within the test method
+- set the values for Test Run custom fields, right from within the test method
 
 ### Main classes
 
