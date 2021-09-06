@@ -113,8 +113,8 @@
         </repository -->
         <repository>
             <id>github</id>
-            <name>GitHub bitcoder Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/bitcoder/xray-junit-extensions</url>
+            <name>GitHub Xray-App Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/Xray-App/xray-junit-extensions</url>
         </repository>
         <snapshotRepository>
             <id>xpand-snapshots</id>
