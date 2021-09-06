@@ -55,7 +55,7 @@ public class EnhancedLegacyXmlReportGeneratingListener implements TestExecutionL
 	private XmlReportData reportData;
 
 	// For tests only
-	EnhancedLegacyXmlReportGeneratingListener(Path reportsDir, PrintWriter out, Clock clock) {
+	public EnhancedLegacyXmlReportGeneratingListener(Path reportsDir, PrintWriter out, Clock clock) {
 		this.reportsDir = reportsDir;
 		this.out = out;
 		this.clock = clock;
