@@ -60,7 +60,7 @@ Add the following dependency to your pom.xml:
         <dependency>
           <groupId>com.xpandit.xray</groupId>
           <artifactId>xray-junit-extensions</artifactId>
-          <version>0.2.0</version>
+          <version>0.3.0</version>
           <scope>test</scope>
         </dependency>
 ```
