@@ -1,10 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.xpandit.xray</groupId>
+    <groupId>com.idera.xray</groupId>
     <artifactId>xray-junit-extensions</artifactId>
     <packaging>jar</packaging>
-    <version>0.3.0</version>
+    <version>0.4.0</version>
     <name>xray-junit-extensions</name>
     <url>http://maven.apache.org</url>
     <properties>
@@ -116,11 +116,11 @@
             <name>GitHub Xray-App Apache Maven Packages</name>
             <url>https://maven.pkg.github.com/Xray-App/xray-junit-extensions</url>
         </repository>
-        <snapshotRepository>
+        <!-- snapshotRepository>
             <id>xpand-snapshots</id>
             <name>xpand-snapshots</name>
             <url>http://maven.xpand-it.com/artifactory/libs-snapshots-local</url>
-        </snapshotRepository>
+        </snapshotRepository -->
    </distributionManagement>
     
     

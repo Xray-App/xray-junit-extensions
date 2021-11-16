@@ -8,11 +8,11 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-package com.xpandit.xray.junit.customjunitxml;
+package com.idera.xray.junit.customjunitxml;
 
-import com.xpandit.xray.junit.customjunitxml.XmlReportWriter.AggregatedTestResult.Type;
-import com.xpandit.xray.junit.customjunitxml.annotations.Requirement;
-import com.xpandit.xray.junit.customjunitxml.annotations.XrayTest;
+import com.idera.xray.junit.customjunitxml.XmlReportWriter.AggregatedTestResult.Type;
+import com.idera.xray.junit.customjunitxml.annotations.Requirement;
+import com.idera.xray.junit.customjunitxml.annotations.XrayTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.platform.commons.logging.Logger;
@@ -59,10 +59,10 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.xpandit.xray.junit.customjunitxml.XmlReportWriter.AggregatedTestResult.Type.ERROR;
-import static com.xpandit.xray.junit.customjunitxml.XmlReportWriter.AggregatedTestResult.Type.FAILURE;
-import static com.xpandit.xray.junit.customjunitxml.XmlReportWriter.AggregatedTestResult.Type.SKIPPED;
-import static com.xpandit.xray.junit.customjunitxml.XmlReportWriter.AggregatedTestResult.Type.SUCCESS;
+import static com.idera.xray.junit.customjunitxml.XmlReportWriter.AggregatedTestResult.Type.ERROR;
+import static com.idera.xray.junit.customjunitxml.XmlReportWriter.AggregatedTestResult.Type.FAILURE;
+import static com.idera.xray.junit.customjunitxml.XmlReportWriter.AggregatedTestResult.Type.SKIPPED;
+import static com.idera.xray.junit.customjunitxml.XmlReportWriter.AggregatedTestResult.Type.SUCCESS;
 import static java.text.MessageFormat.format;
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 import static java.util.Collections.emptyList;
