@@ -1,4 +1,4 @@
-package com.xpandit.xray.junit.customjunitxml;
+package com.idera.xray.junit.customjunitxml;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -8,8 +8,8 @@ import java.nio.file.FileSystems;
 import java.util.Arrays;
 import java.util.Collection;
 
-import com.xpandit.xray.junit.customjunitxml.annotations.Requirement;
-import com.xpandit.xray.junit.customjunitxml.annotations.XrayTest;
+import com.idera.xray.junit.customjunitxml.annotations.Requirement;
+import com.idera.xray.junit.customjunitxml.annotations.XrayTest;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.RepeatedTest;
@@ -60,7 +60,7 @@ public class XrayEnabledTestExamples {
 
     @Test
     public void testWithTestRunEvidence(XrayTestReporter xrayReporter) {
-        xrayReporter.addTestRunEvidence(FileSystems.getDefault().getPath("src/test/java/com/xpandit/xray/junit/customjunitxml/xray.png").toAbsolutePath().toString());
+        xrayReporter.addTestRunEvidence(FileSystems.getDefault().getPath("src/test/java/com/idera/xray/junit/customjunitxml/xray.png").toAbsolutePath().toString());
     }
 
     @Test

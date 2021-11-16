@@ -57,9 +57,9 @@ Add the following dependency to your pom.xml:
 
 ```xml
         <dependency>
-          <groupId>com.xpandit.xray</groupId>
+          <groupId>com.idera.xray</groupId>
           <artifactId>xray-junit-extensions</artifactId>
-          <version>0.3.0</version>
+          <version>0.4.0</version>
           <scope>test</scope>
         </dependency>
 ```

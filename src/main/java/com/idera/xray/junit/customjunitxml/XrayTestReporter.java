@@ -8,7 +8,7 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-package com.xpandit.xray.junit.customjunitxml;
+package com.idera.xray.junit.customjunitxml;
 
 public interface XrayTestReporter {
 
