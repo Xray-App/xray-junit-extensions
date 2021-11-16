@@ -84,7 +84,7 @@ In order to generate the enhanced, customized JUnit XML report we need to regist
 - discovered automatically at runtime based on the contents of a file (e.g `src/test/META-INF/services/org.junit.platform.launcher.TestExecutionListener`) 
 
 ```
-com.xpandit.xray.junit.customjunitxml.EnhancedLegacyXmlReportGeneratingListener
+com.idera.xray.junit.customjunitxml.EnhancedLegacyXmlReportGeneratingListener
 ```
 
 - programmaticaly
@@ -239,7 +239,7 @@ For several reasons. One of them is that it was easier to take advantage of the 
 
 You may find me on [Twitter](https://twitter.com/darktelecom).
 Any questions related with this code, please raise issues in this GitHub project. Feel free to contribute and submit PR's.
-For Xray specific questions, please contact [Xray's support team](https://jira.xpand-it.com/servicedesk/customer/portal/2).
+For Xray specific questions, please contact [Xray's support team](https://jira.getxray.app/servicedesk/customer/portal/2).
 
 ## References
 
