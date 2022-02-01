@@ -247,6 +247,7 @@ For Xray specific questions, please contact [Xray's support team](https://jira.g
 - [How Xray processes JUnit XML reports](https://docs.getxray.app/display/XRAYCLOUD/Taking+advantage+of+JUnit+XML+reports)
 - [JUnit 5 legacy XML reporter](https://junit.org/junit5/docs/current/api/org.junit.platform.reporting/org/junit/platform/reporting/legacy/xml/LegacyXmlReportGeneratingListener.html)
 
+
 ## LICENSE
 
 [Eclipse Public License - v 2.0](LICENSE)
