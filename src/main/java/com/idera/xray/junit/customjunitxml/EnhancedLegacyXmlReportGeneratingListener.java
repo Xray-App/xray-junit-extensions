@@ -21,12 +21,16 @@ import org.junit.platform.launcher.TestPlan;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
+import java.time.LocalDateTime;
+import java.util.Properties;
+import java.time.format.DateTimeFormatter;
 
 /**
  * {@code EnhancedLegacyXmlReportGeneratingListener} is a
@@ -52,6 +56,9 @@ public class EnhancedLegacyXmlReportGeneratingListener implements TestExecutionL
 	private final PrintWriter out;
 	private final Clock clock;
 
+	private String reportFilename = null;
+	boolean addTimestampToReportFilename = false;
+
 	private XmlReportData reportData;
 
 	// For tests only
@@ -59,6 +66,18 @@ public class EnhancedLegacyXmlReportGeneratingListener implements TestExecutionL
 		this.reportsDir = reportsDir;
 		this.out = out;
 		this.clock = clock;
+
+		try {
+			InputStream stream = getClass().getClassLoader().getResourceAsStream("xray-junit-extensions.properties");
+			if (stream != null) {
+				Properties properties = new Properties();
+				properties.load(stream);
+				this.reportFilename = properties.getProperty("report_filename");
+				this.addTimestampToReportFilename = "true".equals(properties.getProperty("add_timestamp_to_report_filename"));
+			}
+		} catch (Exception e) {
+			//e.printStackTrace();
+		}
 	}
 
 	public EnhancedLegacyXmlReportGeneratingListener() {
@@ -117,7 +136,20 @@ public class EnhancedLegacyXmlReportGeneratingListener implements TestExecutionL
 	}
 
 	private void writeXmlReportSafely(TestIdentifier testIdentifier, String rootName) {
-		Path xmlFile = this.reportsDir.resolve("TEST-" + rootName + ".xml");
+		Path xmlFile;
+		String fileName;
+		if ((this.reportFilename != null) && (!"".equals(this.reportFilename))) {
+			fileName = reportFilename;
+		} else {
+			fileName = "TEST-" + rootName;
+		}
+		if (this.addTimestampToReportFilename) {
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH:mm:ss_S");
+			fileName += "-" + LocalDateTime.now().format(formatter);
+		}
+		fileName += ".xml";
+		xmlFile = this.reportsDir.resolve(fileName);
+
 		try (Writer fileWriter = Files.newBufferedWriter(xmlFile)) {
 			new XmlReportWriter(this.reportData).writeXmlReport(testIdentifier, fileWriter);
 		} catch (XMLStreamException | IOException e) {

@@ -45,6 +45,7 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
 import org.joox.Match;
+import org.junit.jupiter.api.Disabled;
 //import org.junit.Test;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -70,6 +71,24 @@ public class EnhancedLegacyXmlTest {
 	Path tempDirectory;
     private static final String REPORT_NAME = "TEST-junit-jupiter.xml";
 
+
+    @Test
+    @Disabled
+    public void shouldSupportCustomReportNames() throws Exception {
+        String testMethodName = "customReportNameTest";
+        executeTestMethod(TEST_EXAMPLES_CLASS, testMethodName);
+
+        String reportName = "custom-junit-report.xml";
+        Match testsuite = readValidXmlFile(tempDirectory.resolve(reportName));
+        Match testcase = testsuite.child("testcase");
+        assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_id")).isEmpty();
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_key")).isEmpty();
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_summary")).isEmpty();
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_description")).isEmpty();
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "tags")).isEmpty();
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "requirements")).isEmpty();
+    }
 
     @Test
     public void simpleTestShouldNotHaveXrayProperties() throws Exception {

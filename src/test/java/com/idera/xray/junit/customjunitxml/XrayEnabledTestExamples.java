@@ -29,6 +29,11 @@ public class XrayEnabledTestExamples {
     }
 
     @Test
+    public void customReportNameTest() {
+    // TBD
+    }
+
+    @Test
     public void testWithTestRunComment(XrayTestReporter xrayReporter) {
         xrayReporter.addComment("hello");
 
