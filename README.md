@@ -77,6 +77,22 @@ In your `.m2/settings.xml`, configure the authentication for the maven repositor
 </servers>
 ```
 
+### Configuration
+
+If you want, you may configure certain aspects of this extension. The defaults should be fine, otherwise please create a properties file as `src/test/resources/xray-junit-extensions.properties`, and define some settings.
+
+- `report_filename`: the name of the report, without ending .xml suffix. Default is "TEST-junit-jupiter.xml"
+- `report_directory`: the directory where to generate the report, in relative or absolute format. Default is "target"
+- `add_timestamp_to_report_filename`: the name of the report, without ending .xml suffix. Default is "false".
+
+Example:
+
+```bash
+report_filename=custom-report-junit
+report_directory=reports
+add_timestamp_to_report_filename=true
+```
+
 ## How to use
 
 In order to generate the enhanced, customized JUnit XML report we need to register the **EnhancedLegacyXmlReportGeneratingListener** listener. This can be done in [several ways](https://junit.org/junit5/docs/current/user-guide/#launcher-api-listeners-custom):

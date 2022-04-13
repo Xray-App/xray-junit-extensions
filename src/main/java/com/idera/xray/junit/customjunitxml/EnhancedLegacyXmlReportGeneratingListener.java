@@ -20,6 +20,8 @@ import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
 
 import javax.xml.stream.XMLStreamException;
+
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -49,10 +51,11 @@ import java.time.format.DateTimeFormatter;
 
 public class EnhancedLegacyXmlReportGeneratingListener implements TestExecutionListener {
 
-	private static final String DEFAULT_REPORTS_DIR = "./reports";
+	private static final String DEFAULT_REPORTS_DIR = "./target";
 	private static final Logger logger = LoggerFactory.getLogger(EnhancedLegacyXmlReportGeneratingListener.class);
 
-	private final Path reportsDir;
+	private Path propertiesFile;
+	private Path reportsDir;
 	private final PrintWriter out;
 	private final Clock clock;
 
@@ -63,16 +66,33 @@ public class EnhancedLegacyXmlReportGeneratingListener implements TestExecutionL
 
 	// For tests only
 	public EnhancedLegacyXmlReportGeneratingListener(Path reportsDir, PrintWriter out, Clock clock) {
+		this(reportsDir, null, out, clock);
+	}
+
+	// For tests only
+	public EnhancedLegacyXmlReportGeneratingListener(Path reportsDir, Path propertiesFile, PrintWriter out, Clock clock) {
 		this.reportsDir = reportsDir;
+		this.propertiesFile = propertiesFile;
 		this.out = out;
 		this.clock = clock;
 
 		try {
-			InputStream stream = getClass().getClassLoader().getResourceAsStream("xray-junit-extensions.properties");
+			
+			InputStream stream = null;
+			if (propertiesFile == null) {
+				stream = getClass().getClassLoader().getResourceAsStream("xray-junit-extensions.properties");
+			} else {
+				// For tests only
+				stream = Files.newInputStream(propertiesFile);
+			}	
 			if (stream != null) {
 				Properties properties = new Properties();
 				properties.load(stream);
 				this.reportFilename = properties.getProperty("report_filename");
+				String customReportsDirectory = properties.getProperty("report_directory");
+				if (customReportsDirectory != null) {
+					this.reportsDir = FileSystems.getDefault().getPath(customReportsDirectory);
+				}
 				this.addTimestampToReportFilename = "true".equals(properties.getProperty("add_timestamp_to_report_filename"));
 			}
 		} catch (Exception e) {
@@ -144,8 +164,8 @@ public class EnhancedLegacyXmlReportGeneratingListener implements TestExecutionL
 			fileName = "TEST-" + rootName;
 		}
 		if (this.addTimestampToReportFilename) {
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH:mm:ss_S");
-			fileName += "-" + LocalDateTime.now().format(formatter);
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH:mm:ss_SSS");
+			fileName += "-" + LocalDateTime.now(this.clock).format(formatter);
 		}
 		fileName += ".xml";
 		xmlFile = this.reportsDir.resolve(fileName);

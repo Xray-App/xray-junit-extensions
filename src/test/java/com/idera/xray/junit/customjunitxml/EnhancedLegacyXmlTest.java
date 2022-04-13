@@ -73,13 +73,83 @@ public class EnhancedLegacyXmlTest {
 
 
     @Test
-    @Disabled
     public void shouldSupportCustomReportNames() throws Exception {
-        String testMethodName = "customReportNameTest";
-        executeTestMethod(TEST_EXAMPLES_CLASS, testMethodName);
+        String testMethodName = "legacyTest";
 
-        String reportName = "custom-junit-report.xml";
+        String customProperties = "report_filename=custom-report-junit\n# report_directory=reports\n# add_timestamp_to_report_filename=true\n";
+        Path customPropertiesFile = Files.createTempFile("xray-junit-extensions", ".properties");
+        Files.write(customPropertiesFile, customProperties.getBytes());
+        executeTestMethodWithCustomProperties(TEST_EXAMPLES_CLASS, testMethodName, customPropertiesFile, "", Clock.systemDefaultZone());
+
+        String reportName = "custom-report-junit.xml";
         Match testsuite = readValidXmlFile(tempDirectory.resolve(reportName));
+        Match testcase = testsuite.child("testcase");
+        assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_id")).isEmpty();
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_key")).isEmpty();
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_summary")).isEmpty();
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_description")).isEmpty();
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "tags")).isEmpty();
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "requirements")).isEmpty();
+    }
+
+    @Test
+    public void shouldSupportCustomReportNamesWithTimestamp() throws Exception {
+        String testMethodName = "legacyTest";
+        String customProperties = "report_filename=custom-report-junit\n# report_directory=reports\nadd_timestamp_to_report_filename=true\n";
+        Path customPropertiesFile = Files.createTempFile("xray-junit-extensions", ".properties");
+        Files.write(customPropertiesFile, customProperties.getBytes());
+
+        String fakeTimestamp = "2021-03-24T12:01:02.456";
+        LocalDateTime now = LocalDateTime.parse(fakeTimestamp);
+        ZoneId zone = ZoneId.of("UTC");
+        Clock clock = Clock.fixed(ZonedDateTime.of(now, zone).toInstant(), zone);
+
+        executeTestMethodWithCustomProperties(TEST_EXAMPLES_CLASS, testMethodName, customPropertiesFile, "", clock);
+
+        String reportName = "custom-report-junit-2021_03_24_12:01:02_456.xml";
+        Match testsuite = readValidXmlFile(tempDirectory.resolve(reportName));
+        Match testcase = testsuite.child("testcase");
+        assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_id")).isEmpty();
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_key")).isEmpty();
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_summary")).isEmpty();
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_description")).isEmpty();
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "tags")).isEmpty();
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "requirements")).isEmpty();
+    }
+
+    @Test
+    public void shouldSupportCustomReportAbsoluteDirectory() throws Exception {
+        String testMethodName = "legacyTest";
+
+        String customReportDir = tempDirectory.resolve("custom_reports").toString();
+        String customProperties = "#report_filename=custom-report-junit\nreport_directory=" + customReportDir + "\n# add_timestamp_to_report_filename=true\n";
+        Path customPropertiesFile = Files.createTempFile("xray-junit-extensions", ".properties");
+        Files.write(customPropertiesFile, customProperties.getBytes());
+        executeTestMethodWithCustomProperties(TEST_EXAMPLES_CLASS, testMethodName, customPropertiesFile, "", Clock.systemDefaultZone());
+        
+        Match testsuite = readValidXmlFile(tempDirectory.resolve("custom_reports").resolve(REPORT_NAME));
+        Match testcase = testsuite.child("testcase");
+        assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_id")).isEmpty();
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_key")).isEmpty();
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_summary")).isEmpty();
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_description")).isEmpty();
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "tags")).isEmpty();
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "requirements")).isEmpty();
+    }
+
+    @Test
+    public void shouldSupportCustomReportRelativeDirectory() throws Exception {
+        String testMethodName = "legacyTest";
+        String relativeCustomReportDir = "target/custom_reports";
+        String customProperties = "#report_filename=custom-report-junit\nreport_directory=" + relativeCustomReportDir + "\n# add_timestamp_to_report_filename=true\n";
+        Path customPropertiesFile = Files.createTempFile("xray-junit-extensions", ".properties");
+        Files.write(customPropertiesFile, customProperties.getBytes());
+        executeTestMethodWithCustomProperties(TEST_EXAMPLES_CLASS, testMethodName, customPropertiesFile, "", Clock.systemDefaultZone());
+        
+        Match testsuite = readValidXmlFile(FileSystems.getDefault().getPath(".").resolve(relativeCustomReportDir).resolve(REPORT_NAME));
         Match testcase = testsuite.child("testcase");
         assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
         assertThat(testcase.child("properties").children("property").matchAttr("name", "test_id")).isEmpty();
@@ -220,6 +290,15 @@ public class EnhancedLegacyXmlTest {
 
     private void executeTestMethod(Class<?> testClass, String methodName) {
         executeTestMethodWithParams(testClass, methodName, "");      
+    }
+
+    private void executeTestMethodWithCustomProperties(Class<?> testClass, String methodName, Path propertiesPath,  String methodParameterTypes, Clock clock) {
+        LauncherDiscoveryRequest discoveryRequest = request()//
+                .selectors(selectMethod(testClass, methodName, ""))
+                .build();
+        Launcher launcher = LauncherFactory.create();
+        EnhancedLegacyXmlReportGeneratingListener listener = new EnhancedLegacyXmlReportGeneratingListener(tempDirectory, propertiesPath, new PrintWriter(System.out), clock);
+        launcher.execute(discoveryRequest, listener);  
     }
 
     private void executeTestMethodWithParams(Class<?> testClass, String methodName, String methodParameterTypes) {
