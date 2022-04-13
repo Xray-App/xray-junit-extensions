@@ -112,7 +112,7 @@ public class EnhancedLegacyXmlTest {
 
         String fakeTimestamp = "2021-03-24T12:01:02.456";
         LocalDateTime now = LocalDateTime.parse(fakeTimestamp);
-		ZoneId zone = ZoneId.systemDefault();
+		ZoneId zone = ZoneId.of("UTC");
         Clock clock = Clock.fixed(ZonedDateTime.of(now, zone).toInstant(), zone);
 
         executeTestMethod(TEST_EXAMPLES_CLASS, testMethodName, clock);
