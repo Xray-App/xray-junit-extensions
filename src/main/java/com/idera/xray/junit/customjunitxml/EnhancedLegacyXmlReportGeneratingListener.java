@@ -64,12 +64,11 @@ public class EnhancedLegacyXmlReportGeneratingListener implements TestExecutionL
 
 	private XmlReportData reportData;
 
-	// For tests only
 	public EnhancedLegacyXmlReportGeneratingListener(Path reportsDir, PrintWriter out, Clock clock) {
 		this(reportsDir, null, out, clock);
 	}
 
-	// For tests only
+	// main construtor; used directly by tests
 	public EnhancedLegacyXmlReportGeneratingListener(Path reportsDir, Path propertiesFile, PrintWriter out, Clock clock) {
 		this.reportsDir = reportsDir;
 		this.propertiesFile = propertiesFile;
@@ -84,27 +83,38 @@ public class EnhancedLegacyXmlReportGeneratingListener implements TestExecutionL
 			} else {
 				// For tests only
 				stream = Files.newInputStream(propertiesFile);
-			}	
+			}
+
+			// if properties exist, or are enforced from the test, then process them
 			if (stream != null) {
 				Properties properties = new Properties();
 				properties.load(stream);
-				this.reportFilename = properties.getProperty("report_filename");
+				String customReportFilename = properties.getProperty("report_filename");
+				if (customReportFilename != null) {
+					this.reportFilename = customReportFilename;
+				}
 				String customReportsDirectory = properties.getProperty("report_directory");
 				if (customReportsDirectory != null) {
 					this.reportsDir = FileSystems.getDefault().getPath(customReportsDirectory);
 				}
 				this.addTimestampToReportFilename = "true".equals(properties.getProperty("add_timestamp_to_report_filename"));
+			} else {
+				if (reportsDir == null) {
+					this.reportsDir = FileSystems.getDefault().getPath(DEFAULT_REPORTS_DIR);
+				}
 			}
 		} catch (Exception e) {
 			//e.printStackTrace();
 		}
 	}
 
+	// service discovered automatically at runtime by JUnit
 	public EnhancedLegacyXmlReportGeneratingListener() {
 		this(FileSystems.getDefault().getPath(DEFAULT_REPORTS_DIR), new PrintWriter(System.out, true),
 				Clock.systemDefaultZone());
 	}
 
+	// used whenever registering listener programatically
 	public EnhancedLegacyXmlReportGeneratingListener(Path reportsDir, PrintWriter out) {
 		this(reportsDir, out, Clock.systemDefaultZone());
 	}
