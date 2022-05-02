@@ -20,13 +20,19 @@ import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
 
 import javax.xml.stream.XMLStreamException;
+
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
+import java.time.LocalDateTime;
+import java.util.Properties;
+import java.time.format.DateTimeFormatter;
 
 /**
  * {@code EnhancedLegacyXmlReportGeneratingListener} is a
@@ -45,27 +51,70 @@ import java.time.Clock;
 
 public class EnhancedLegacyXmlReportGeneratingListener implements TestExecutionListener {
 
-	private static final String DEFAULT_REPORTS_DIR = "./reports";
+	private static final String DEFAULT_REPORTS_DIR = "./target";
 	private static final Logger logger = LoggerFactory.getLogger(EnhancedLegacyXmlReportGeneratingListener.class);
 
-	private final Path reportsDir;
+	private Path propertiesFile;
+	private Path reportsDir;
 	private final PrintWriter out;
 	private final Clock clock;
 
+	private String reportFilename = null;
+	boolean addTimestampToReportFilename = false;
+
 	private XmlReportData reportData;
 
-	// For tests only
 	public EnhancedLegacyXmlReportGeneratingListener(Path reportsDir, PrintWriter out, Clock clock) {
-		this.reportsDir = reportsDir;
-		this.out = out;
-		this.clock = clock;
+		this(reportsDir, null, out, clock);
 	}
 
+	// main construtor; used directly by tests
+	public EnhancedLegacyXmlReportGeneratingListener(Path reportsDir, Path propertiesFile, PrintWriter out, Clock clock) {
+		this.reportsDir = reportsDir;
+		this.propertiesFile = propertiesFile;
+		this.out = out;
+		this.clock = clock;
+
+		try {
+			
+			InputStream stream = null;
+			if (propertiesFile == null) {
+				stream = getClass().getClassLoader().getResourceAsStream("xray-junit-extensions.properties");
+			} else {
+				// For tests only
+				stream = Files.newInputStream(propertiesFile);
+			}
+
+			// if properties exist, or are enforced from the test, then process them
+			if (stream != null) {
+				Properties properties = new Properties();
+				properties.load(stream);
+				String customReportFilename = properties.getProperty("report_filename");
+				if (customReportFilename != null) {
+					this.reportFilename = customReportFilename;
+				}
+				String customReportsDirectory = properties.getProperty("report_directory");
+				if (customReportsDirectory != null) {
+					this.reportsDir = FileSystems.getDefault().getPath(customReportsDirectory);
+				}
+				this.addTimestampToReportFilename = "true".equals(properties.getProperty("add_timestamp_to_report_filename"));
+			} else {
+				if (reportsDir == null) {
+					this.reportsDir = FileSystems.getDefault().getPath(DEFAULT_REPORTS_DIR);
+				}
+			}
+		} catch (Exception e) {
+			//e.printStackTrace();
+		}
+	}
+
+	// service discovered automatically at runtime by JUnit
 	public EnhancedLegacyXmlReportGeneratingListener() {
 		this(FileSystems.getDefault().getPath(DEFAULT_REPORTS_DIR), new PrintWriter(System.out, true),
 				Clock.systemDefaultZone());
 	}
 
+	// used whenever registering listener programatically
 	public EnhancedLegacyXmlReportGeneratingListener(Path reportsDir, PrintWriter out) {
 		this(reportsDir, out, Clock.systemDefaultZone());
 	}
@@ -117,7 +166,20 @@ public class EnhancedLegacyXmlReportGeneratingListener implements TestExecutionL
 	}
 
 	private void writeXmlReportSafely(TestIdentifier testIdentifier, String rootName) {
-		Path xmlFile = this.reportsDir.resolve("TEST-" + rootName + ".xml");
+		Path xmlFile;
+		String fileName;
+		if ((this.reportFilename != null) && (!"".equals(this.reportFilename))) {
+			fileName = reportFilename;
+		} else {
+			fileName = "TEST-" + rootName;
+		}
+		if (this.addTimestampToReportFilename) {
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH:mm:ss_SSS");
+			fileName += "-" + LocalDateTime.now(this.clock).format(formatter);
+		}
+		fileName += ".xml";
+		xmlFile = this.reportsDir.resolve(fileName);
+
 		try (Writer fileWriter = Files.newBufferedWriter(xmlFile)) {
 			new XmlReportWriter(this.reportData).writeXmlReport(testIdentifier, fileWriter);
 		} catch (XMLStreamException | IOException e) {
