@@ -62,7 +62,8 @@ import org.xml.sax.SAXException;
 
 public class EnhancedLegacyXmlTest {
 
-    private static final Class TEST_EXAMPLES_CLASS = XrayEnabledTestExamples.class;
+    private static final Class XRAY_TEST_EXAMPLES_CLASS = XrayEnabledTestExamples.class;
+    private static final Class TESTRAIL_TEST_EXAMPLES_CLASS = TRailEnabledTestExamples.class;
     private static final Runnable FAILING_BLOCK = () -> fail("should fail");
     private static final Runnable SUCCEEDING_TEST = () -> {
     };
@@ -79,7 +80,7 @@ public class EnhancedLegacyXmlTest {
         String customProperties = "report_filename=custom-report-junit\n# report_directory=reports\n# add_timestamp_to_report_filename=true\n";
         Path customPropertiesFile = Files.createTempFile("xray-junit-extensions", ".properties");
         Files.write(customPropertiesFile, customProperties.getBytes());
-        executeTestMethodWithCustomProperties(TEST_EXAMPLES_CLASS, testMethodName, customPropertiesFile, "", Clock.systemDefaultZone());
+        executeTestMethodWithCustomProperties(XRAY_TEST_EXAMPLES_CLASS, testMethodName, customPropertiesFile, "", Clock.systemDefaultZone());
 
         String reportName = "custom-report-junit.xml";
         Match testsuite = readValidXmlFile(tempDirectory.resolve(reportName));
@@ -105,7 +106,7 @@ public class EnhancedLegacyXmlTest {
         ZoneId zone = ZoneId.of("UTC");
         Clock clock = Clock.fixed(ZonedDateTime.of(now, zone).toInstant(), zone);
 
-        executeTestMethodWithCustomProperties(TEST_EXAMPLES_CLASS, testMethodName, customPropertiesFile, "", clock);
+        executeTestMethodWithCustomProperties(XRAY_TEST_EXAMPLES_CLASS, testMethodName, customPropertiesFile, "", clock);
 
         String reportName = "custom-report-junit-2021_03_24_12:01:02_456.xml";
         Match testsuite = readValidXmlFile(tempDirectory.resolve(reportName));
@@ -127,7 +128,7 @@ public class EnhancedLegacyXmlTest {
         String customProperties = "#report_filename=custom-report-junit\nreport_directory=" + customReportDir + "\n# add_timestamp_to_report_filename=true\n";
         Path customPropertiesFile = Files.createTempFile("xray-junit-extensions", ".properties");
         Files.write(customPropertiesFile, customProperties.getBytes());
-        executeTestMethodWithCustomProperties(TEST_EXAMPLES_CLASS, testMethodName, customPropertiesFile, "", Clock.systemDefaultZone());
+        executeTestMethodWithCustomProperties(XRAY_TEST_EXAMPLES_CLASS, testMethodName, customPropertiesFile, "", Clock.systemDefaultZone());
         
         Match testsuite = readValidXmlFile(tempDirectory.resolve("custom_reports").resolve(REPORT_NAME));
         Match testcase = testsuite.child("testcase");
@@ -147,7 +148,7 @@ public class EnhancedLegacyXmlTest {
         String customProperties = "#report_filename=custom-report-junit\nreport_directory=" + relativeCustomReportDir + "\n# add_timestamp_to_report_filename=true\n";
         Path customPropertiesFile = Files.createTempFile("xray-junit-extensions", ".properties");
         Files.write(customPropertiesFile, customProperties.getBytes());
-        executeTestMethodWithCustomProperties(TEST_EXAMPLES_CLASS, testMethodName, customPropertiesFile, "", Clock.systemDefaultZone());
+        executeTestMethodWithCustomProperties(XRAY_TEST_EXAMPLES_CLASS, testMethodName, customPropertiesFile, "", Clock.systemDefaultZone());
         
         Match testsuite = readValidXmlFile(FileSystems.getDefault().getPath(".").resolve(relativeCustomReportDir).resolve(REPORT_NAME));
         Match testcase = testsuite.child("testcase");
@@ -163,7 +164,7 @@ public class EnhancedLegacyXmlTest {
     @Test
     public void simpleTestShouldNotHaveXrayProperties() throws Exception {
         String testMethodName = "legacyTest";
-        executeTestMethod(TEST_EXAMPLES_CLASS, testMethodName);
+        executeTestMethod(XRAY_TEST_EXAMPLES_CLASS, testMethodName);
 
         Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
         Match testcase = testsuite.child("testcase");
@@ -185,7 +186,7 @@ public class EnhancedLegacyXmlTest {
 		ZoneId zone = ZoneId.of("UTC");
         Clock clock = Clock.fixed(ZonedDateTime.of(now, zone).toInstant(), zone);
 
-        executeTestMethod(TEST_EXAMPLES_CLASS, testMethodName, clock);
+        executeTestMethod(XRAY_TEST_EXAMPLES_CLASS, testMethodName, clock);
         
         Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
         Match testcase = testsuite.child("testcase");
@@ -198,9 +199,29 @@ public class EnhancedLegacyXmlTest {
 
 
     @Test
+    public void shouldMapTestRailIdToTestcaseProperty() throws Exception {
+        String testMethodName = "annotatedTestRailWithCustomId";
+        executeTestMethod(TESTRAIL_TEST_EXAMPLES_CLASS, testMethodName);
+        Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
+        Match testcase = testsuite.child("testcase");
+        assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_id").attr("value")).isEqualTo("123");
+    }
+
+    @Test
+    public void shouldMapPrefixedTestRailIdToTestcaseProperty() throws Exception {
+        String testMethodName = "annotatedTestRailWithCustomIdWithPrefix";
+        executeTestMethod(TESTRAIL_TEST_EXAMPLES_CLASS, testMethodName);
+        Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
+        Match testcase = testsuite.child("testcase");
+        assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_id").attr("value")).isEqualTo("123");
+    }
+
+    @Test
     public void shouldMapXrayTestIdToTestcaseProperty() throws Exception {
         String testMethodName = "annotatedXrayTestWithCustomId";
-        executeTestMethod(TEST_EXAMPLES_CLASS, testMethodName);
+        executeTestMethod(XRAY_TEST_EXAMPLES_CLASS, testMethodName);
         Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
         Match testcase = testsuite.child("testcase");
         assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
@@ -210,7 +231,7 @@ public class EnhancedLegacyXmlTest {
     @Test
     public void shouldMapXrayTestKeyToTestcaseProperty() throws Exception {
         String testMethodName = "annotatedXrayTestWithKey";
-        executeTestMethod(TEST_EXAMPLES_CLASS, testMethodName);
+        executeTestMethod(XRAY_TEST_EXAMPLES_CLASS, testMethodName);
         Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
         Match testcase = testsuite.child("testcase");
         assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
@@ -221,7 +242,7 @@ public class EnhancedLegacyXmlTest {
     @Test
     public void shouldMapXrayTestSummaryToTestcaseProperty() throws Exception {
         String testMethodName = "annotatedXrayTestWithSummary";
-        executeTestMethod(TEST_EXAMPLES_CLASS, testMethodName);
+        executeTestMethod(XRAY_TEST_EXAMPLES_CLASS, testMethodName);
         //System.out.println(tempDirectory.resolve(REPORT_NAME));
         //Thread.sleep(10000);
         Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
@@ -234,7 +255,7 @@ public class EnhancedLegacyXmlTest {
     @Test
     public void shouldMapXrayTestDescriptionToTestcaseProperty() throws Exception {
         String testMethodName = "annotatedXrayTestWithDescription";
-        executeTestMethod(TEST_EXAMPLES_CLASS, testMethodName);
+        executeTestMethod(XRAY_TEST_EXAMPLES_CLASS, testMethodName);
         //System.out.println(tempDirectory.resolve(REPORT_NAME));
         //Thread.sleep(10000);
         Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
@@ -247,7 +268,7 @@ public class EnhancedLegacyXmlTest {
     @Test
     public void shouldMapOneRequirementToTestcaseProperty() throws Exception {
         String testMethodName = "annotatedWithOneRequirement";
-        executeTestMethod(TEST_EXAMPLES_CLASS, testMethodName);
+        executeTestMethod(XRAY_TEST_EXAMPLES_CLASS, testMethodName);
         Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
         Match testcase = testsuite.child("testcase");
         assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
@@ -257,7 +278,7 @@ public class EnhancedLegacyXmlTest {
     @Test
     public void shouldMapMultipleRequirementsToTestcaseProperty() throws Exception {
         String testMethodName = "annotatedWithMultipleRequirements";
-        executeTestMethod(TEST_EXAMPLES_CLASS, testMethodName);
+        executeTestMethod(XRAY_TEST_EXAMPLES_CLASS, testMethodName);
         Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
         Match testcase = testsuite.child("testcase");
         assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
@@ -267,7 +288,7 @@ public class EnhancedLegacyXmlTest {
     @Test
     public void shouldMapOneTagToTestcaseProperty() throws Exception {
         String testMethodName = "annotatedWithOneTag";
-        executeTestMethod(TEST_EXAMPLES_CLASS, testMethodName);
+        executeTestMethod(XRAY_TEST_EXAMPLES_CLASS, testMethodName);
         Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
         Match testcase = testsuite.child("testcase");
         assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
@@ -277,7 +298,7 @@ public class EnhancedLegacyXmlTest {
     @Test
     public void shouldMapMultipleTagsToTestcaseProperty() throws Exception {
         String testMethodName = "annotatedWithMultipleTags";
-        executeTestMethod(TEST_EXAMPLES_CLASS, testMethodName);
+        executeTestMethod(XRAY_TEST_EXAMPLES_CLASS, testMethodName);
         Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
         Match testcase = testsuite.child("testcase");
         assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
@@ -324,7 +345,7 @@ public class EnhancedLegacyXmlTest {
     @Test
     public void shouldMapDisplayNameToTestSummaryProperty() throws Exception {
         String testMethodName = "annotatedWithDisplayName";
-        executeTestMethod(TEST_EXAMPLES_CLASS, testMethodName);
+        executeTestMethod(XRAY_TEST_EXAMPLES_CLASS, testMethodName);
         Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
         Match testcase = testsuite.child("testcase");
         assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
@@ -334,7 +355,7 @@ public class EnhancedLegacyXmlTest {
     @Test
     public void shouldMapDisplayNameInParameterizedTestToTestSummaryProperty() throws Exception {
         String testMethodName = "parameterizedTestAnnotatedWithDisplayName";
-        executeTestMethodWithParams(TEST_EXAMPLES_CLASS, testMethodName, "int");
+        executeTestMethodWithParams(XRAY_TEST_EXAMPLES_CLASS, testMethodName, "int");
         Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
         Match testcase = testsuite.child("testcase");
         assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
@@ -344,7 +365,7 @@ public class EnhancedLegacyXmlTest {
     @Test
     public void shouldNotMapMethodNameInParameterizedTestToTestSummaryProperty() throws Exception {
         String testMethodName = "parameterizedTestWithoutDisplayName";
-        executeTestMethodWithParams(TEST_EXAMPLES_CLASS, testMethodName, "int");
+        executeTestMethodWithParams(XRAY_TEST_EXAMPLES_CLASS, testMethodName, "int");
         Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
         Match testcase = testsuite.child("testcase");
         assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
@@ -355,7 +376,7 @@ public class EnhancedLegacyXmlTest {
     @Test
     public void shouldMapDisplayNameInRepeatedTestToTestSummaryProperty() throws Exception {
         String testMethodName = "repeatedTestAnnotatedWithDisplayName";
-        executeTestMethod(TEST_EXAMPLES_CLASS, testMethodName);
+        executeTestMethod(XRAY_TEST_EXAMPLES_CLASS, testMethodName);
         Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
         Match testcase = testsuite.child("testcase");
         assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
@@ -365,7 +386,7 @@ public class EnhancedLegacyXmlTest {
     @Test
     public void shouldNotMapMethodNameInRepeatedTestToTestSummaryProperty() throws Exception {
         String testMethodName = "repeatedTestAnnotatedWithoutDisplayName";
-        executeTestMethod(TEST_EXAMPLES_CLASS, testMethodName);
+        executeTestMethod(XRAY_TEST_EXAMPLES_CLASS, testMethodName);
         Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
         Match testcase = testsuite.child("testcase");
         assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
@@ -376,7 +397,7 @@ public class EnhancedLegacyXmlTest {
     @Test
     public void shouldMapDisplayNameInDynamicTestToTestSummaryProperty() throws Exception {
         String testMethodName = "dynamicTestsFromCollection";
-        executeTestMethod(TEST_EXAMPLES_CLASS, testMethodName);
+        executeTestMethod(XRAY_TEST_EXAMPLES_CLASS, testMethodName);
         Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
         Match testcase = testsuite.child("testcase");
         assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
@@ -387,7 +408,7 @@ public class EnhancedLegacyXmlTest {
     public void shouldCreateReportEntryForAComment() throws Exception {
         String testMethodName = "testWithTestRunComment";
         LauncherDiscoveryRequest discoveryRequest = request()//
-                .selectors(selectMethod(TEST_EXAMPLES_CLASS, testMethodName, "com.idera.xray.junit.customjunitxml.XrayTestReporter"))
+                .selectors(selectMethod(XRAY_TEST_EXAMPLES_CLASS, testMethodName, "com.idera.xray.junit.customjunitxml.XrayTestReporter"))
                 .build();
         Launcher launcher = LauncherFactory.create();
 
@@ -413,7 +434,7 @@ public class EnhancedLegacyXmlTest {
     public void shouldCreateReportEntryForComments() throws Exception {
         String testMethodName = "testWithTestRunComments";
         LauncherDiscoveryRequest discoveryRequest = request()
-                .selectors(selectMethod(TEST_EXAMPLES_CLASS, testMethodName, "com.idera.xray.junit.customjunitxml.XrayTestReporter"))
+                .selectors(selectMethod(XRAY_TEST_EXAMPLES_CLASS, testMethodName, "com.idera.xray.junit.customjunitxml.XrayTestReporter"))
                 .build();
         Launcher launcher = LauncherFactory.create();
 
@@ -446,7 +467,7 @@ public class EnhancedLegacyXmlTest {
     @Test
     public void shouldStoreTestRunCommentsToTestcaseProperty() throws Exception {
         String testMethodName = "testWithTestRunComments";
-        executeTestMethodWithParams(TEST_EXAMPLES_CLASS, testMethodName, "com.idera.xray.junit.customjunitxml.XrayTestReporter");
+        executeTestMethodWithParams(XRAY_TEST_EXAMPLES_CLASS, testMethodName, "com.idera.xray.junit.customjunitxml.XrayTestReporter");
         //System.out.println(tempDirectory.resolve(REPORT_NAME));
         //Thread.sleep(10000);
         Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
@@ -458,7 +479,7 @@ public class EnhancedLegacyXmlTest {
     @Test
     public void shouldStoreTestRunCustomFieldsToTestcaseProperty() throws Exception {
         String testMethodName = "testWithStringBasedTestRunCustomFields";
-        executeTestMethodWithParams(TEST_EXAMPLES_CLASS, testMethodName, "com.idera.xray.junit.customjunitxml.XrayTestReporter");
+        executeTestMethodWithParams(XRAY_TEST_EXAMPLES_CLASS, testMethodName, "com.idera.xray.junit.customjunitxml.XrayTestReporter");
         Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
         Match testcase = testsuite.child("testcase");
         assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
@@ -479,7 +500,7 @@ public class EnhancedLegacyXmlTest {
     public void shouldCreateReportEntryForCustomFields() throws Exception {
         String testMethodName = "testWithStringBasedTestRunCustomFields";
         LauncherDiscoveryRequest discoveryRequest = request()
-                .selectors(selectMethod(TEST_EXAMPLES_CLASS, testMethodName, "com.idera.xray.junit.customjunitxml.XrayTestReporter"))
+                .selectors(selectMethod(XRAY_TEST_EXAMPLES_CLASS, testMethodName, "com.idera.xray.junit.customjunitxml.XrayTestReporter"))
                 .build();
         Launcher launcher = LauncherFactory.create();
 
@@ -497,7 +518,7 @@ public class EnhancedLegacyXmlTest {
     public void shouldCreateReportEntryForArrayBasedCustomFields() throws Exception {
         String testMethodName = "testWithArrayBasedTestRunCustomField";
         LauncherDiscoveryRequest discoveryRequest = request()
-                .selectors(selectMethod(TEST_EXAMPLES_CLASS, testMethodName, "com.idera.xray.junit.customjunitxml.XrayTestReporter"))
+                .selectors(selectMethod(XRAY_TEST_EXAMPLES_CLASS, testMethodName, "com.idera.xray.junit.customjunitxml.XrayTestReporter"))
                 .build();
         Launcher launcher = LauncherFactory.create();
 
@@ -513,7 +534,7 @@ public class EnhancedLegacyXmlTest {
     @Test
     public void shouldStoreArrayBasedTestRunCustomFieldsToTestcaseProperty() throws Exception {
         String testMethodName = "testWithArrayBasedTestRunCustomField";
-        executeTestMethodWithParams(TEST_EXAMPLES_CLASS, testMethodName, "com.idera.xray.junit.customjunitxml.XrayTestReporter");
+        executeTestMethodWithParams(XRAY_TEST_EXAMPLES_CLASS, testMethodName, "com.idera.xray.junit.customjunitxml.XrayTestReporter");
         Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
         Match testcase = testsuite.child("testcase");
         assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
@@ -524,7 +545,7 @@ public class EnhancedLegacyXmlTest {
     @Test
     public void shouldStoreArrayBasedTestRunCustomFieldAndSpecialCharsToTestcaseProperty() throws Exception {
         String testMethodName = "testWithArrayBasedTestRunCustomFieldAndSpecialChars";
-        executeTestMethodWithParams(TEST_EXAMPLES_CLASS, testMethodName, "com.idera.xray.junit.customjunitxml.XrayTestReporter");
+        executeTestMethodWithParams(XRAY_TEST_EXAMPLES_CLASS, testMethodName, "com.idera.xray.junit.customjunitxml.XrayTestReporter");
         Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
         Match testcase = testsuite.child("testcase");
         assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
@@ -535,7 +556,7 @@ public class EnhancedLegacyXmlTest {
     @Test
     public void shouldStoreTestRunEvidenceToTestcaseProperty() throws Exception {
         String testMethodName = "testWithTestRunEvidence";
-        executeTestMethodWithParams(TEST_EXAMPLES_CLASS, testMethodName, "com.idera.xray.junit.customjunitxml.XrayTestReporter");
+        executeTestMethodWithParams(XRAY_TEST_EXAMPLES_CLASS, testMethodName, "com.idera.xray.junit.customjunitxml.XrayTestReporter");
         Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
         Match testcase = testsuite.child("testcase");
         assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
@@ -556,7 +577,7 @@ public class EnhancedLegacyXmlTest {
     public void shouldCreateReportEntryForEvidence() throws Exception {
         String testMethodName = "testWithTestRunEvidence";
         LauncherDiscoveryRequest discoveryRequest = request()
-                .selectors(selectMethod(TEST_EXAMPLES_CLASS, testMethodName, "com.idera.xray.junit.customjunitxml.XrayTestReporter"))
+                .selectors(selectMethod(XRAY_TEST_EXAMPLES_CLASS, testMethodName, "com.idera.xray.junit.customjunitxml.XrayTestReporter"))
                 .build();
         Launcher launcher = LauncherFactory.create();
 

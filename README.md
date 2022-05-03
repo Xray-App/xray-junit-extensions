@@ -8,7 +8,7 @@ https://raw.githubusercontent.com/Xray-App/xray-junit-extensions/main/.github/ba
 [![license](https://img.shields.io/badge/License-EPL%202.0-green.svg)](https://opensource.org/licenses/EPL-2.0)
 [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/Xray-App/community)
 
-This repo contains several improvements for [JUnit](https://junit.org/junit5/) that allow you to take better advantage of JUnit 5 (jupiter engine) whenever using it together with [Xray Test Management](https://getxray.app).
+This repo contains several improvements for [JUnit](https://junit.org/junit5/) that allow you to take better advantage of JUnit 5 (jupiter engine) whenever using it together with [Xray Test Management](https://getxray.app). It also provides some capabilities in case you're using TestRail.
 This code is provided as-is; you're free to use it and modify it at your will (see license ahead).
 
 This is a preliminary release so it is subject to changes, at any time.
@@ -21,7 +21,7 @@ Therefore, it's important to attach some relevant information during the executi
 This project is highly based on previous work by the JUnit team. The idea is to be able to produce a custom JUnit XML report containing additional information that Xray can take advantage of.
 This way, testers can automate the test script and at the same time provide information such as the covered requirement, right from the test automation code. Additional information may be provided, either through new annotations or by injecting a custom reporter as argument to the test method, using a specific extension.
 
-### Features
+### Features (for Xray users)
 
 - track started and finished date timestamps for each test
 - link a test method to an existing Test issue or use auto-provisioning
@@ -31,13 +31,25 @@ This way, testers can automate the test script and at the same time provide info
 - add comments ot the Test Run, right from within the test method
 - set the values for Test Run custom fields, right from within the test method
 
+
+### Features (for TestRail users)
+
+- link a test method to an existing testcase
+
 ### Main classes
 
 The project consists of:
 
-- **EnhancedLegacyXmlReportGeneratingListener**: a custom TestExecutionListener implementation that is responsible for generating a custom JUnit XML with additional properties Xray can take advantage of
+- **EnhancedLegacyXmlReportGeneratingListener**: a custom TestExecutionListener implementation that is responsible for generating a custom JUnit XML with additional properties Xray (or TestRail) can take advantage of
+
+For Xray,
+
 - **@XrayTest**, **@Requirement**: new, optional annotations to provide additional information whenever writing the automated test methods
 - **XrayTestReporterParameterResolver**: a new, optional JUnit 5 extension that provides the means to report additional information to Xray, inside the test method flow
+
+For TestRail,
+
+- **@TestRail**: new, optional annotation to provide additional information whenever writing the automated test methods for TestRail
 
 ## Installing
 
@@ -119,7 +131,7 @@ Registering the listener is mandatory.
 In order to take advantage of the capabilities of this new listener, new annotations can be used. There's also a custom ParameterResolver **XrayTestReporterParameterResolver**, which allows users to inject a **XrayTestReporter** object as argument on the test methods. This will be useful when it's needed to report/attach some additional information during the test lifecycle.
 
 
-### New annotations
+### New annotations usable in Xray context
 
 Two new annotations (`@XrayTest`, `@Requirement`) can be used.
 The annotations are optional and cannot be use more than once per test method.
@@ -178,7 +190,30 @@ _Examples:_
 ```
 
 
-### New Extension
+### New annotations usable in TestRail context
+
+A new annotation (`@TestRail`) can be used.
+The annotation is optional and cannot be use more than once per test method.
+
+#### @TestRail
+
+Test methods don't need to be annotated with `@TestRail` unless you want to take advantage of the following enhancements.
+
+You may use the **@TestRail** annotation to:
+
+- enforce mapping of result to specific, existing test case using the **id** attribute
+
+_Examples:_
+
+1. enforce the given test and corresponding result to be reported against the existing testcase having the id C123 (i.e., create an execution in TestRail for the testcase with internal id 123)  
+
+```java
+    @Test
+    @TestRail(id = "C123")
+    public void CanAddNumbers()
+```
+
+### New JUnit5 extension for Xray
 
 A new JUnit 5 compatible Extension **XrayTestReporterParameterResolver** can be used, so we can inject a **XrayTestReporter** object as argument in the test methods.
 

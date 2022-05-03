@@ -13,6 +13,7 @@ package com.idera.xray.junit.customjunitxml;
 import com.idera.xray.junit.customjunitxml.XmlReportWriter.AggregatedTestResult.Type;
 import com.idera.xray.junit.customjunitxml.annotations.Requirement;
 import com.idera.xray.junit.customjunitxml.annotations.XrayTest;
+import com.idera.xray.junit.customjunitxml.annotations.TestRail;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.platform.commons.logging.Logger;
@@ -55,6 +56,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -270,10 +272,23 @@ class XmlReportWriter {
 		}
 
 		Optional<XrayTest> xrayTest = AnnotationSupport.findAnnotation(testMethod, XrayTest.class);
+		Optional<TestRail> testRail = AnnotationSupport.findAnnotation(testMethod, TestRail.class);
 		String test_key = null;
 		String test_id = null;
 		String test_summary = null;
 		String test_description = null;
+		if (testRail.isPresent()) {
+			test_id = testRail.get().id();
+			if ((test_id != null) && (!test_id.isEmpty())) {
+				Pattern pattern = Pattern.compile("([cC]?)([0-9]+)");
+				Matcher matcher = pattern.matcher(test_id);
+				if (matcher.find()) {
+					test_id = matcher.group(2);
+					addProperty(writer, "test_id", test_id);
+				}			
+			}
+		}
+
 		if (xrayTest.isPresent()) {
 			test_key = xrayTest.get().key();
 			if ((test_key != null) && (!test_key.isEmpty())) {
