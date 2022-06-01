@@ -8,7 +8,7 @@
  * https://www.eclipse.org/legal/epl-v20.html"
  */
 
-package com.idera.xray.junit.customjunitxml;
+package app.getxray.xray.junit.customjunitxml;
 
 import java.util.List;
 import java.util.ArrayList;

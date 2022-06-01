@@ -8,7 +8,7 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-package com.idera.xray.junit.customjunitxml.wip;
+package app.getxray.xray.junit.customjunitxml.wip;
 
 import org.junit.platform.engine.support.hierarchical.EngineExecutionContext;
 

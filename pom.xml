@@ -1,12 +1,48 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.idera.xray</groupId>
+    <groupId>app.getxray</groupId>
     <artifactId>xray-junit-extensions</artifactId>
     <packaging>jar</packaging>
-    <version>0.5.0</version>
+    <version>0.6.0</version>
     <name>xray-junit-extensions</name>
-    <url>http://maven.apache.org</url>
+    <description>Improvements for JUnit that allow you to take better advantage of JUnit 5 (jupiter engine) whenever using it together with Xray Test Management.</description>
+    <url>https://github.com/Xray-App/xray-junit-extensions</url>
+  
+    <licenses>
+      <license>
+        <name>Eclipse Public License v2.0</name>
+        <url>https://raw.githubusercontent.com/Xray-App/xray-junit-extensions/main/LICENSE</url>
+        <distribution>repo</distribution>
+      </license>
+    </licenses>
+  
+    <organization>
+      <name>Xblend</name>
+      <url>https://www.getxray.app</url>
+    </organization>
+  
+    <developers>
+      <developer>
+        <name>Sergio Freire</name>
+        <email>sergio.freire@getxray.app</email>
+        <organization>Xblend</organization>
+        <organizationUrl>https://www.getxray.app</organizationUrl>
+      </developer>
+      <developer>
+        <name>Cristiano Cunha</name>
+        <email>cristiano.cunha@getxray.app</email>
+        <organization>Xblend</organization>
+        <organizationUrl>https://www.getxray.app</organizationUrl>
+      </developer>
+    </developers>
+  
+    <scm>
+      <connection>scm:git:git://github.com/Xray-App/xray-junit-extensions.git</connection>
+      <developerConnection>scm:git:ssh://github.com/Xray-App/xray-junit-extensions.git</developerConnection>
+      <url>https://github.com/Xray-App/xray-maven-plugin/tree/main</url>
+    </scm>
+
     <properties>
         <junit-jupiter.version>5.7.1</junit-jupiter.version>
         <junit.version>4.12</junit.version>
@@ -126,6 +162,20 @@
     
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                    <id>sign-artifacts</id>
+                    <phase>verify</phase>
+                    <goals>
+                        <goal>sign</goal>
+                    </goals>
+                    </execution>
+                </executions>
+            </plugin>
 
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -198,6 +248,9 @@
                     <testFailureIgnore>true</testFailureIgnore>
                     <disableXmlReport>true</disableXmlReport>
                     <useFile>false</useFile>
+                    <excludes>
+                        <exclude>app.getxray.xray.junit.customjunitxml.wip.TestingExperiments</exclude>
+                      </excludes>
                 </configuration>
                 <!--
                 <dependencies>

@@ -8,11 +8,8 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-package com.idera.xray.junit.customjunitxml;
+package app.getxray.xray.junit.customjunitxml;
 
-import com.idera.xray.junit.customjunitxml.XmlReportWriter.AggregatedTestResult.Type;
-import com.idera.xray.junit.customjunitxml.annotations.Requirement;
-import com.idera.xray.junit.customjunitxml.annotations.XrayTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.platform.commons.logging.Logger;
@@ -26,6 +23,10 @@ import org.junit.platform.engine.support.descriptor.MethodSource;
 import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
 import org.junit.platform.reporting.legacy.LegacyReportingUtils;
+
+import app.getxray.xray.junit.customjunitxml.XmlReportWriter.AggregatedTestResult.Type;
+import app.getxray.xray.junit.customjunitxml.annotations.Requirement;
+import app.getxray.xray.junit.customjunitxml.annotations.XrayTest;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -59,10 +60,10 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.idera.xray.junit.customjunitxml.XmlReportWriter.AggregatedTestResult.Type.ERROR;
-import static com.idera.xray.junit.customjunitxml.XmlReportWriter.AggregatedTestResult.Type.FAILURE;
-import static com.idera.xray.junit.customjunitxml.XmlReportWriter.AggregatedTestResult.Type.SKIPPED;
-import static com.idera.xray.junit.customjunitxml.XmlReportWriter.AggregatedTestResult.Type.SUCCESS;
+import static app.getxray.xray.junit.customjunitxml.XmlReportWriter.AggregatedTestResult.Type.ERROR;
+import static app.getxray.xray.junit.customjunitxml.XmlReportWriter.AggregatedTestResult.Type.FAILURE;
+import static app.getxray.xray.junit.customjunitxml.XmlReportWriter.AggregatedTestResult.Type.SKIPPED;
+import static app.getxray.xray.junit.customjunitxml.XmlReportWriter.AggregatedTestResult.Type.SUCCESS;
 import static java.text.MessageFormat.format;
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 import static java.util.Collections.emptyList;
