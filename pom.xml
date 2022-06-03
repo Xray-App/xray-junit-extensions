@@ -4,7 +4,7 @@
     <groupId>app.getxray</groupId>
     <artifactId>xray-junit-extensions</artifactId>
     <packaging>jar</packaging>
-    <version>0.6.0-SNAPSHOT</version>
+    <version>0.6.0</version>
     <name>xray-junit-extensions</name>
     <description>Improvements for JUnit that allow you to take better advantage of JUnit 5 (jupiter engine) whenever using it together with Xray Test Management.</description>
     <url>https://github.com/Xray-App/xray-junit-extensions</url>
@@ -140,26 +140,18 @@
         </dependency>
                 
     </dependencies>
-    
-    <distributionManagement>
-        <!-- repository>
-            <id>xpand-releases</id>
-            <name>xpand-releases</name>
-            <url>http://maven.xpand-it.com/artifactory/libs-releases-local</url>
-        </repository -->
-        <repository>
-            <id>github</id>
-            <name>GitHub Xray-App Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/Xray-App/xray-junit-extensions</url>
-        </repository>
-        <!-- snapshotRepository>
-            <id>xpand-snapshots</id>
-            <name>xpand-snapshots</name>
-            <url>http://maven.xpand-it.com/artifactory/libs-snapshots-local</url>
-        </snapshotRepository -->
+
+   <distributionManagement>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
    </distributionManagement>
-    
-    
+
     <build>
         <plugins>
             <plugin>
