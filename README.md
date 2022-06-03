@@ -41,13 +41,15 @@ The project consists of:
 
 ## Installing
 
+These extensions are available as an artifact available on (Maven) Central Repository, which is configured by default in your Maven instalation.
+
 Add the following dependency to your pom.xml:
 
 ```xml
         <dependency>
           <groupId>app.getxray</groupId>
           <artifactId>xray-junit-extensions</artifactId>
-          <version>0.5.0</version>
+          <version>0.6.0</version>
           <scope>test</scope>
         </dependency>
 ```
