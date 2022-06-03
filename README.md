@@ -41,40 +41,17 @@ The project consists of:
 
 ## Installing
 
-Configure the maven repository in your pom.xml:
-
-```xml
-        <repository>
-            <id>github</id>
-            <url>https://maven.pkg.github.com/Xray-App/*</url>
-            <snapshots>
-              <enabled>true</enabled>
-            </snapshots>
-        </repository>
-```
+These extensions are available as an artifact available on (Maven) Central Repository, which is configured by default in your Maven instalation.
 
 Add the following dependency to your pom.xml:
 
 ```xml
         <dependency>
-          <groupId>com.idera.xray</groupId>
+          <groupId>app.getxray</groupId>
           <artifactId>xray-junit-extensions</artifactId>
-          <version>0.4.0</version>
+          <version>0.6.0</version>
           <scope>test</scope>
         </dependency>
-```
-
-In your `.m2/settings.xml`, configure the authentication for the maven repository.
-
-```xml
- <servers>
-    <server>
-      <id>github</id>
-      <username>GITHUB_USERNAME</username>
-      <password>GITHUB_PERSONAL_TOKEN</password>
-    </server>
-    ...
-</servers>
 ```
 
 ### Configuration

@@ -8,7 +8,7 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-package com.idera.xray.junit.customjunitxml.annotations;
+package app.getxray.xray.junit.customjunitxml.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -17,6 +17,12 @@ import java.lang.annotation.Target;
 
 @Target({ ElementType.TYPE, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Requirement {
-    String[] value();
+public @interface XrayTest {
+    String key() default "";
+
+    String id() default "";
+
+    String summary() default "";
+
+    String description() default "";
 }

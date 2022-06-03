@@ -9,7 +9,7 @@
  */
 
 
- package com.idera.xray.junit.customjunitxml.wip;
+ package app.getxray.xray.junit.customjunitxml.wip;
 
 
 //import org.junit.Test;
@@ -34,6 +34,9 @@ import org.junit.platform.launcher.core.LauncherConfig;
 import org.junit.platform.launcher.core.LauncherFactory;
 import org.junit.platform.testkit.engine.EngineExecutionResults;
 import org.junit.platform.testkit.engine.EngineTestKit;
+
+import app.getxray.xray.junit.customjunitxml.EnhancedLegacyXmlReportGeneratingListener;
+import app.getxray.xray.junit.customjunitxml.XrayEnabledTestExamples;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
@@ -72,10 +75,6 @@ import java.time.ZonedDateTime;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
-
-import com.idera.xray.junit.customjunitxml.EnhancedLegacyXmlReportGeneratingListener;
-import com.idera.xray.junit.customjunitxml.XrayEnabledTestExamples;
-
 
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectMethod;
