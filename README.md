@@ -77,7 +77,7 @@ In order to generate the enhanced, customized JUnit XML report we need to regist
 - discovered automatically at runtime based on the contents of a file (e.g `src/test/META-INF/services/org.junit.platform.launcher.TestExecutionListener`) 
 
 ```
-com.idera.xray.junit.customjunitxml.EnhancedLegacyXmlReportGeneratingListener
+app.getxray.xray.junit.customjunitxml.EnhancedLegacyXmlReportGeneratingListener
 ```
 
 - programmaticaly
