@@ -366,6 +366,10 @@ class XmlReportWriter {
 			newLine(writer);
 		}
 
+		// quick hack: add a dummy property, to overcome a temporary Xray Cloud parsing issue for empty <properties> element
+		// ideally, the <properties> element should not be added if there are no properties for the testcase
+		addProperty(writer, "_dummy_", "");
+
 		writer.writeEndElement(); // properties
 		newLine(writer);
 

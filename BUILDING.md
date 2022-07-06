@@ -1,6 +1,6 @@
 # Instructions for building, testing, and deploying
 
-### Building
+## Building
 
 Run maven as usual to get the dependencies and compile the code.
 
@@ -8,13 +8,13 @@ Run maven as usual to get the dependencies and compile the code.
 mvn clean compile
 ```
 
-### Testing
+## Testing
 
 ```bash
 mvn clean compile test
 ```
 
-### Deploying/Releasing
+## Deploying/Releasing
 
 Upon sucessful deployment, the package will be available on (Maven) [Central Repository](https://search.maven.org/).
 
