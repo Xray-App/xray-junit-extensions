@@ -10,7 +10,6 @@
 
 package app.getxray.xray.junit.customjunitxml;
 
-import java.util.List;
 import java.util.ArrayList;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
