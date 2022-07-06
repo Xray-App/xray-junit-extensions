@@ -54,7 +54,7 @@ Your gpg keyname can be found with `gpg --list-signatures --keyid-format 0xshort
 Then build, run the tests, and deploy.
 
 ```bash
-mvn clean compile test package gpg:sign deploy
+mvn clean compile test package javadoc:aggregate-jar deploy
 ```
 
 Note that the `gpg:sign` goal should be called implicitly by the `package` goal.
