@@ -243,4 +243,6 @@ For Xray specific questions, please contact [Xray's support team](https://jira.g
 
 ## LICENSE
 
+Based on code from [JUnit5](https://github.com/junit-team/junit5/) project. 
+
 [Eclipse Public License - v 2.0](LICENSE)
