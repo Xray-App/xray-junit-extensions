@@ -213,8 +213,7 @@ JUnit 5 provides a [legacy XML reporter for the jupiter engine](https://junit.or
 
 ## TO DOs
 
-- cleanup code
-- add more tests
+...
 
 ## FAQ
 
@@ -226,7 +225,6 @@ Probably. As there is no official JUnit XML schema, it's hard to say that in adv
 
 3. Why use a custom JUnit XML report instead of Xray JSON report?
 For several reasons. One of them is that it was easier to take advantage of the existing code and adapt it.
-
 
 ## Contact
 
@@ -240,9 +238,8 @@ For Xray specific questions, please contact [Xray's support team](https://jira.g
 - [How Xray processes JUnit XML reports](https://docs.getxray.app/display/XRAYCLOUD/Taking+advantage+of+JUnit+XML+reports)
 - [JUnit 5 legacy XML reporter](https://junit.org/junit5/docs/current/api/org.junit.platform.reporting/org/junit/platform/reporting/legacy/xml/LegacyXmlReportGeneratingListener.html)
 
-
 ## LICENSE
 
-Based on code from [JUnit5](https://github.com/junit-team/junit5/) project. 
+Based on code from [JUnit5](https://github.com/junit-team/junit5/) project.
 
 [Eclipse Public License - v 2.0](LICENSE)

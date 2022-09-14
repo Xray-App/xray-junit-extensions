@@ -174,7 +174,7 @@ public class EnhancedLegacyXmlReportGeneratingListener implements TestExecutionL
 			fileName = "TEST-" + rootName;
 		}
 		if (this.addTimestampToReportFilename) {
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH:mm:ss_SSS");
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy_MM_dd-HH_mm_ss_SSS");
 			fileName += "-" + LocalDateTime.now(this.clock).format(formatter);
 		}
 		fileName += ".xml";

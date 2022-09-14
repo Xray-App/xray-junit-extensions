@@ -26,6 +26,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.nio.file.FileSystems;
@@ -37,6 +39,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Base64;
+import java.util.Properties;
 
 import javax.xml.XMLConstants;
 import javax.xml.transform.dom.DOMSource;
@@ -109,7 +112,7 @@ public class EnhancedLegacyXmlTest {
 
         executeTestMethodWithCustomProperties(TEST_EXAMPLES_CLASS, testMethodName, customPropertiesFile, "", clock);
 
-        String reportName = "custom-report-junit-2021_03_24_12:01:02_456.xml";
+        String reportName = "custom-report-junit-2021_03_24-12_01_02_456.xml";
         Match testsuite = readValidXmlFile(tempDirectory.resolve(reportName));
         Match testcase = testsuite.child("testcase");
         assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
@@ -126,9 +129,15 @@ public class EnhancedLegacyXmlTest {
         String testMethodName = "legacyTest";
 
         String customReportDir = tempDirectory.resolve("custom_reports").toString();
-        String customProperties = "#report_filename=custom-report-junit\nreport_directory=" + customReportDir + "\n# add_timestamp_to_report_filename=true\n";
         Path customPropertiesFile = Files.createTempFile("xray-junit-extensions", ".properties");
-        Files.write(customPropertiesFile, customProperties.getBytes());
+        //String customProperties = "#report_filename=custom-report-junit\nreport_directory=" + customReportDir + "\n# add_timestamp_to_report_filename=true\n";
+        //Files.write(customPropertiesFile, customProperties.getBytes());
+
+        Properties properties = new Properties();
+        OutputStream outputStream = new FileOutputStream(customPropertiesFile.toString());
+        properties.setProperty("report_directory", customReportDir);
+        properties.store(outputStream, null);
+
         executeTestMethodWithCustomProperties(TEST_EXAMPLES_CLASS, testMethodName, customPropertiesFile, "", Clock.systemDefaultZone());
         
         Match testsuite = readValidXmlFile(tempDirectory.resolve("custom_reports").resolve(REPORT_NAME));
