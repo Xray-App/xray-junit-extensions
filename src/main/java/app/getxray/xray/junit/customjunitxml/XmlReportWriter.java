@@ -97,9 +97,11 @@ class XmlReportWriter {
 
 	private final XmlReportData reportData;
 	private static final Logger logger = LoggerFactory.getLogger(EnhancedLegacyXmlReportGeneratingListener.class);
+	private boolean reportOnlyAnnotatedTests = false;
 
-	XmlReportWriter(XmlReportData reportData) {
+	XmlReportWriter(XmlReportData reportData, boolean reportOnlyAnnotatedTests) {
 		this.reportData = reportData;
+		this.reportOnlyAnnotatedTests = reportOnlyAnnotatedTests;
 	}
 
 	void writeXmlReport(TestIdentifier rootDescriptor, Writer out) throws XMLStreamException {
@@ -229,6 +231,14 @@ class XmlReportWriter {
 	private void writeTestcase(TestIdentifier testIdentifier, AggregatedTestResult testResult,
 			NumberFormat numberFormat, XMLStreamWriter writer) throws XMLStreamException {
 
+		final Optional<TestSource> testSource = testIdentifier.getSource();
+		final Optional<Method> testMethod = testSource.flatMap(this::getTestMethod);
+		Optional<XrayTest> xrayTest = AnnotationSupport.findAnnotation(testMethod, XrayTest.class);
+		Optional<Requirement> requirement = AnnotationSupport.findAnnotation(testMethod, Requirement.class);
+		if (reportOnlyAnnotatedTests && (!requirement.isPresent() && !xrayTest.isPresent())) {
+			return;
+		}
+
 		writer.writeStartElement("testcase");
 		writeAttributeSafely(writer, "name", getName(testIdentifier));
 		writeAttributeSafely(writer, "classname", getClassName(testIdentifier));
@@ -260,17 +270,13 @@ class XmlReportWriter {
 			newLine(writer);
 		}
 
-		final Optional<TestSource> testSource = testIdentifier.getSource();
-		final Optional<Method> testMethod = testSource.flatMap(this::getTestMethod);
 		// final Optional<Class<?>> testClass = testSource.flatMap(this::getTestClass);
 
-		Optional<Requirement> requirement = AnnotationSupport.findAnnotation(testMethod, Requirement.class);
 		if (requirement.isPresent()) {
 			String[] requirements = requirement.get().value();
 			addProperty(writer, "requirements", String.join(",", requirements));
 		}
 
-		Optional<XrayTest> xrayTest = AnnotationSupport.findAnnotation(testMethod, XrayTest.class);
 		String test_key = null;
 		String test_id = null;
 		String test_summary = null;
