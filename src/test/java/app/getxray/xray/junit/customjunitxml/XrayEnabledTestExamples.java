@@ -136,6 +136,21 @@ public class XrayEnabledTestExamples {
         fail("without DisplayName");
     }
 
+    @ParameterizedTest(name="#{index} - Test with Argument={0}")
+    @ValueSource(strings = {"John Doe", "Jimi Hendrix"})
+    public void parameterizedTestWithCustomName(String name)
+    {
+        fail("test failed on purpose");
+    }
+
+    @DisplayName("custom DisplayName")
+    @ParameterizedTest(name="{displayName}: #{index} - Test with Argument={0}")
+    @ValueSource(strings = {"John Doe", "Jimi Hendrix"})
+    public void parameterizedTestWithCustomNameAndDisplayName(String name)
+    {
+        fail("test failed on purpose");
+    }
+
     @DisplayName("custom name")
     @RepeatedTest(3)
     void repeatedTestAnnotatedWithDisplayName() {

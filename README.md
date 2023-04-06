@@ -192,7 +192,8 @@ public class XrayEnabledTestExamples {
 
 The summary of the Test issue will be set based on these rules (the first that applies):
 
-* based on the summary attribute of @XrayTest annotation (e.g. `@XrayTest(summary = "xxx")`); 
+* based on the `summary` attribute of @XrayTest annotation (e.g. `@XrayTest(summary = "xxx")`);
+* based on the `name` attribute of `ParameterizedTest` annotation  (e.g. `@ParameterizedTest(name="{displayName}: #{index} - Test with Argument={0}")`), for parameterized tests; Inn this case, the `name` attribute can have a mention to the `DisplayName` in case the test is also annotated with it;
 * based on the `@DisplayName` annotation, or the display name of dynamically created tests from a TestFactory;
 * based on the test's method name.
 
@@ -200,6 +201,8 @@ The summary of the Test issue will be set based on these rules (the first that a
 
 For the time being, and similar to what happened with legacy JUnit XML reports produces with JUnit 4, parameterized tests (i.e. annotated with `@ParameterizedTest`) will be mapped to similar `<testcase>` elements in the JUnit XML report.
 The same happens with repeated tests (i.e annotated with `@RepeatedTest`).
+
+This will be reviewed on an upcoming version.
 
 ## Background
 
