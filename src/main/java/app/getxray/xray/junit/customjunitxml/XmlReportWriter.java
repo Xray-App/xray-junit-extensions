@@ -12,6 +12,7 @@ package app.getxray.xray.junit.customjunitxml;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
 import org.junit.platform.commons.support.AnnotationSupport;
@@ -294,17 +295,27 @@ class XmlReportWriter {
 		}
 
 		Optional<TestFactory> dynamicTest = AnnotationSupport.findAnnotation(testMethod, TestFactory.class);
+		Optional<ParameterizedTest> parameterizedTest = AnnotationSupport.findAnnotation(testMethod, ParameterizedTest.class);
 		Optional<DisplayName> displayName = AnnotationSupport.findAnnotation(testMethod, DisplayName.class);
+
+		if ( ((test_summary == null) || (test_summary.isEmpty())) && (dynamicTest.isPresent()) ) {
+			test_summary = testIdentifier.getDisplayName();
+		}
+		if ( ((test_summary == null) || (test_summary.isEmpty())) && (parameterizedTest.isPresent()) ) {
+			String customName = parameterizedTest.get().name();
+			if ((customName != null) && (!customName.isEmpty()) && (!ParameterizedTest.DEFAULT_DISPLAY_NAME.equals(customName)) ) {
+				//test_summary = customName; // unresolved, e.g. "#{index} - Test with Argument={0}"
+				test_summary = testIdentifier.getDisplayName(); // resolved name, e.g. "#2 - Test with Argument=Jimi Hendrix"
+			}
+		}
 		if ( ((test_summary == null) || (test_summary.isEmpty())) && (displayName.isPresent()) ) {
 			//test_summary = testIdentifier.getDisplayName();
 			test_summary = displayName.get().value();
 		}
-		if ( ((test_summary == null) || (test_summary.isEmpty())) && (dynamicTest.isPresent()) ) {
-			test_summary = testIdentifier.getDisplayName();
-		}
 		if ((test_summary != null) && (!test_summary.isEmpty())) {
 			addProperty(writer, "test_summary", test_summary);
 		}
+
 
 		List<String> tags = testIdentifier.getTags().stream().map(TestTag::getName).map(String::trim)
 				.collect(Collectors.toList());

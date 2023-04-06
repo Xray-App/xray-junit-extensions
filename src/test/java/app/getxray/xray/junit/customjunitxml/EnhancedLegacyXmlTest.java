@@ -61,6 +61,7 @@ import org.junit.platform.launcher.core.LauncherFactory;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import app.getxray.xray.junit.customjunitxml.EnhancedLegacyXmlReportGeneratingListener;
@@ -359,9 +360,42 @@ public class EnhancedLegacyXmlTest {
         Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
         Match testcase = testsuite.child("testcase");
         assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_summary")).isEmpty(); // isEqualTo("parameterizedTestWithoutDisplayName");
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_summary")).isEmpty();
     }
     
+
+    @Test
+    public void shouldMapNameInParameterizedTestToTestSummaryProperty() throws Exception {
+        String testMethodName = "parameterizedTestWithCustomName";
+        executeTestMethodWithParams(TEST_EXAMPLES_CLASS, testMethodName, "java.lang.String");
+        Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
+        assertThat(testsuite.attr("tests", int.class)).isEqualTo(2);
+        Match testcase = testsuite.children("testcase").first();
+        assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
+        ///assertThat(testcase.child("properties").children("property").matchAttr("name", "test_summary").attr("value")).isEqualTo("#1 - Test with Argument=John Doe");
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_summary").attr("value")).isEqualTo("#2 - Test with Argument=Jimi Hendrix");
+
+        Match testcase2 = testcase.next();
+        assertThat(testcase2.attr("name", String.class)).isEqualTo(testMethodName);
+        assertThat(testcase2.child("properties").children("property").matchAttr("name", "test_summary").attr("value")).isEqualTo("#1 - Test with Argument=John Doe");
+    }
+
+
+    @Test
+    public void shouldMapNameInParameterizedTestToTestSummaryProperty2() throws Exception {
+        String testMethodName = "parameterizedTestWithCustomNameAndDisplayName";
+        executeTestMethodWithParams(TEST_EXAMPLES_CLASS, testMethodName, "java.lang.String");
+        Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
+        assertThat(testsuite.attr("tests", int.class)).isEqualTo(2);
+        Match testcase = testsuite.children("testcase").first();
+        assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_summary").attr("value")).isEqualTo("custom DisplayName: #2 - Test with Argument=Jimi Hendrix");
+
+        Match testcase2 = testcase.next();
+        assertThat(testcase2.attr("name", String.class)).isEqualTo(testMethodName);
+        assertThat(testcase2.child("properties").children("property").matchAttr("name", "test_summary").attr("value")).isEqualTo("custom DisplayName: #1 - Test with Argument=John Doe");
+    }
+
 
     @Test
     public void shouldMapDisplayNameInRepeatedTestToTestSummaryProperty() throws Exception {
