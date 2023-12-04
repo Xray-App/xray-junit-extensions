@@ -21,6 +21,8 @@ import org.junit.platform.launcher.TestPlan;
 
 import javax.xml.stream.XMLStreamException;
 
+import static org.junit.jupiter.api.DynamicTest.stream;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -76,16 +78,7 @@ public class EnhancedLegacyXmlReportGeneratingListener implements TestExecutionL
 		this.out = out;
 		this.clock = clock;
 
-		try {
-			
-			InputStream stream = null;
-			if (propertiesFile == null) {
-				stream = getClass().getClassLoader().getResourceAsStream("xray-junit-extensions.properties");
-			} else {
-				// For tests only
-				stream = Files.newInputStream(propertiesFile);
-			}
-
+		try (InputStream stream = (propertiesFile == null) ? getClass().getClassLoader().getResourceAsStream("xray-junit-extensions.properties") :  Files.newInputStream(propertiesFile)) {
 			// if properties exist, or are enforced from the test, then process them
 			if (stream != null) {
 				Properties properties = new Properties();

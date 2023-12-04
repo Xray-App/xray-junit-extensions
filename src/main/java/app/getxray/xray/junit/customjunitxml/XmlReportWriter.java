@@ -325,10 +325,6 @@ class XmlReportWriter {
 
 		List<ReportEntry> entries = this.reportData.getReportEntries(testIdentifier);
 		Map<String, String> testrunCustomFields = getTestRunCustomFields(entries);
-		//for (Map.Entry<String, String> customField : testrunCustomFields.entrySet()) {
-		//	addProperty(writer, customField.getKey(), customField.getValue());
-		//}
-
 
 		if (!testrunCustomFields.isEmpty()) {
 			writer.writeStartElement("property");
