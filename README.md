@@ -77,7 +77,7 @@ report_only_annotated_tests=false
 
 In order to generate the enhanced, customized JUnit XML report we need to register the **EnhancedLegacyXmlReportGeneratingListener** listener. This can be done in [several ways](https://junit.org/junit5/docs/current/user-guide/#launcher-api-listeners-custom):
 
-- discovered automatically at runtime based on the contents of a file (e.g `src/test/META-INF/services/org.junit.platform.launcher.TestExecutionListener`) 
+- discovered automatically at runtime based on the contents of a file (e.g `src/test/resources/META-INF/services/org.junit.platform.launcher.TestExecutionListener`) 
 
 ```
 app.getxray.xray.junit.customjunitxml.EnhancedLegacyXmlReportGeneratingListener
