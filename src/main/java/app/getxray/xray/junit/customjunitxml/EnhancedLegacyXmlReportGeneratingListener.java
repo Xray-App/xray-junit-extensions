@@ -157,6 +157,14 @@ public class EnhancedLegacyXmlReportGeneratingListener implements TestExecutionL
 		if (isRoot(testIdentifier)) {
 			String rootName = UniqueId.parse(testIdentifier.getUniqueId()).getSegments().get(0).getValue();
 			writeXmlReportSafely(testIdentifier, rootName);
+			/*
+			
+			System.out.println("=======================================");
+			String parentIdLastSegment = testIdentifier.getParentIdObject().get().getLastSegment().getValue();
+			String lastSegment = testIdentifier.getUniqueIdObject().getLastSegment().getValue();
+			System.out.println("last_segment: " + lastSegment);
+			writeXmlReportSafely(testIdentifier, lastSegment);
+			*/
 		}
 	}
 
@@ -184,7 +192,8 @@ public class EnhancedLegacyXmlReportGeneratingListener implements TestExecutionL
 	}
 
 	private boolean isRoot(TestIdentifier testIdentifier) {
-		return !testIdentifier.getParentId().isPresent();
+		 return !testIdentifier.getParentId().isPresent();
+		//return testIdentifier.getParentId().isPresent() && testIdentifier.getParentIdObject().get().getSegments().size() == 1;
 	}
 
 	private void printException(String message, Exception exception) {
