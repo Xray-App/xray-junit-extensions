@@ -4,7 +4,7 @@
     <groupId>app.getxray</groupId>
     <artifactId>xray-junit-extensions</artifactId>
     <packaging>jar</packaging>
-    <version>0.7.1</version>
+    <version>0.7.2</version>
     <name>xray-junit-extensions</name>
     <description>Improvements for JUnit that allow you to take better advantage of JUnit 5 (jupiter engine) whenever using it together with Xray Test Management.</description>
     <url>https://github.com/Xray-App/xray-junit-extensions</url>
@@ -262,7 +262,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.6</version>
+                <version>0.8.11</version>
                 <executions>
                     <execution>
                         <goals>
