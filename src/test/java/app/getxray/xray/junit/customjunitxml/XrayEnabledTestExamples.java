@@ -16,9 +16,6 @@ import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-
-import app.getxray.xray.junit.customjunitxml.XrayTestReporter;
-import app.getxray.xray.junit.customjunitxml.XrayTestReporterParameterResolver;
 import app.getxray.xray.junit.customjunitxml.annotations.Requirement;
 import app.getxray.xray.junit.customjunitxml.annotations.XrayTest;
 

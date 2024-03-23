@@ -68,6 +68,8 @@ import app.getxray.xray.junit.customjunitxml.EnhancedLegacyXmlReportGeneratingLi
 public class EnhancedLegacyXmlTest {
 
     private static final Class TEST_EXAMPLES_CLASS = XrayEnabledTestExamples.class;
+    private static final Class CUSTOM_DISPLAYNAME_CLASS = XrayEnabledTestCustomDisplayName.class;
+
     private static final Runnable FAILING_BLOCK = () -> fail("should fail");
     private static final Runnable SUCCEEDING_TEST = () -> {
     };
@@ -252,6 +254,23 @@ public class EnhancedLegacyXmlTest {
         assertThat(testcase.child("properties").children("property").matchAttr("name", "test_id")).isEmpty();
         assertThat(testcase.child("properties").children("property").matchAttr("name", "test_key")).isEmpty();
         assertThat(testcase.child("properties").children("property").matchAttr("name", "test_summary")).isEmpty();
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_description")).isEmpty();
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "tags")).isEmpty();
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "requirements")).isEmpty();
+    }
+
+
+    @Test
+    public void simpleTestUsingCustomDisplayNameGeneration() throws Exception {
+        String testMethodName = "legacyTest";
+        executeTestMethod(CUSTOM_DISPLAYNAME_CLASS, testMethodName);
+
+        Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
+        Match testcase = testsuite.child("testcase");
+        assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_id")).isEmpty();
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_key")).isEmpty();
+        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_summary").attr("value")).isEqualTo("legacy test (custom_name)");
         assertThat(testcase.child("properties").children("property").matchAttr("name", "test_description")).isEmpty();
         assertThat(testcase.child("properties").children("property").matchAttr("name", "tags")).isEmpty();
         assertThat(testcase.child("properties").children("property").matchAttr("name", "requirements")).isEmpty();
