@@ -48,22 +48,7 @@
         <mockito.version>4.3.1</mockito.version>
         <slf4j-log4j12.version>1.7.25</slf4j-log4j12.version>
         <version.maven-plugin-plugin>3.6.0</version.maven-plugin-plugin>
-
-        <!--Xray Properties -->
-
-        <!--IN PROFILE ~.m2/settings.xml-->
-        <!--<xray.jiraURL></xray.jiraURL>
-        <xray.resultsFormat>JUNIT</xray.resultsFormat>
-        <xray.username>admin</xray.username>
-        <xray.password>admin</xray.password>
-        <xray.projectKey>JUNIT</xray.projectKey>
-        <xray.testExecKey></xray.testExecKey>
-        <xray.testPlanKey></xray.testPlanKey>
-        <xray.testEnvironments></xray.testEnvironments>
-        <xray.revision></xray.revision>
-        -->
-
-        <!--End Xray Properties -->
+        <nexus-staging-maven-plugin.version>1.6.13</nexus-staging-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -153,6 +138,17 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>${nexus-staging-maven-plugin.version}</version>
+                <extensions>true</extensions>
+                <configuration>
+                  <serverId>ossrh</serverId>
+                  <nexusUrl>https://s01.oss.sonatype.org</nexusUrl>
+                  <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
