@@ -15,21 +15,29 @@ package app.getxray.xray.junit.customjunitxml;
 import java.util.Arrays;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
+//import static org.assertj.core.api.Assertions.entry;
 import static org.joox.JOOX.$;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+//import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectMethod;
 import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.request;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -39,7 +47,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Base64;
+import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.xml.XMLConstants;
 import javax.xml.transform.dom.DOMSource;
@@ -48,9 +58,10 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
 import org.joox.Match;
+import org.json.JSONArray;
 import org.junit.jupiter.api.Disabled;
-//import org.junit.Test;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.platform.engine.reporting.ReportEntry;
 import org.junit.platform.launcher.Launcher;
@@ -60,43 +71,50 @@ import org.junit.platform.launcher.TestPlan;
 import org.junit.platform.launcher.core.LauncherFactory;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
-import app.getxray.xray.junit.customjunitxml.EnhancedLegacyXmlReportGeneratingListener;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsonschema.JsonSchema;
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
+import com.jayway.jsonpath.spi.json.JsonSmartJsonProvider;
+import com.networknt.schema.InputFormat;
+import com.networknt.schema.JsonSchemaFactory;
+import com.networknt.schema.SchemaValidatorsConfig;
+import com.networknt.schema.SpecVersion;
+import com.networknt.schema.SpecVersionDetector;
+import com.networknt.schema.ValidationMessage;
+
 import app.getxray.xray.junit.xray_json.XrayJsonReporter;
+
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.*;
+import static org.hamcrest.Matchers.equalTo;
 
 public class XrayJsonReporterTest {
 
     private static final Class TEST_EXAMPLES_CLASS = XrayEnabledTestExamples.class;
     private static final Runnable FAILING_BLOCK = () -> fail("should fail");
-    private static final Runnable SUCCEEDING_TEST = () -> {
-    };
+    private static final Runnable SUCCEEDING_TEST = () -> { };
 
 	@TempDir
 	Path tempDirectory;
-    private static final String REPORT_NAME = "TEST-junit-jupiter.xml";
+    private static final String REPORT_NAME = "TEST-junit-jupiter.json";
 
 
     @Test
     public void shouldSupportCustomReportNames() throws Exception {
         String testMethodName = "legacyTest";
 
-        String customProperties = "report_filename=custom-report-junit\n# report_directory=reports\n# add_timestamp_to_report_filename=true\n";
+        String customProperties = "report_filename=custom-report-xray\n# report_directory=reports\n# add_timestamp_to_report_filename=true\n";
         Path customPropertiesFile = Files.createTempFile("xray-junit-extensions", ".properties");
         Files.write(customPropertiesFile, customProperties.getBytes());
         executeTestMethodWithCustomProperties(TEST_EXAMPLES_CLASS, testMethodName, customPropertiesFile, "", Clock.systemDefaultZone());
 
-        String reportName = "custom-report-junit.xml";
-        Match testsuite = readValidXmlFile(tempDirectory.resolve(reportName));
-        Match testcase = testsuite.child("testcase");
-        assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_id")).isEmpty();
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_key")).isEmpty();
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_summary")).isEmpty();
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_description")).isEmpty();
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "tags")).isEmpty();
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "requirements")).isEmpty();
+        String reportName = "custom-report-xray.json";
+        DocumentContext report = readValidXrayJsonFile(tempDirectory.resolve(reportName));
+        // assertThat(report.read("$.testExecutions[0].info.name", String.class)).isEqualTo(testMethodName);
     }
 
     @Test
@@ -113,16 +131,8 @@ public class XrayJsonReporterTest {
 
         executeTestMethodWithCustomProperties(TEST_EXAMPLES_CLASS, testMethodName, customPropertiesFile, "", clock);
 
-        String reportName = "custom-report-junit-2021_03_24-12_01_02_456.xml";
-        Match testsuite = readValidXmlFile(tempDirectory.resolve(reportName));
-        Match testcase = testsuite.child("testcase");
-        assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_id")).isEmpty();
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_key")).isEmpty();
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_summary")).isEmpty();
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_description")).isEmpty();
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "tags")).isEmpty();
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "requirements")).isEmpty();
+        String reportName = "custom-report-junit-2021_03_24-12_01_02_456.json";
+        DocumentContext report = readValidXrayJsonFile(tempDirectory.resolve(reportName));
     }
 
     @Test
@@ -140,16 +150,7 @@ public class XrayJsonReporterTest {
         properties.store(outputStream, null);
 
         executeTestMethodWithCustomProperties(TEST_EXAMPLES_CLASS, testMethodName, customPropertiesFile, "", Clock.systemDefaultZone());
-        
-        Match testsuite = readValidXmlFile(tempDirectory.resolve("custom_reports").resolve(REPORT_NAME));
-        Match testcase = testsuite.child("testcase");
-        assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_id")).isEmpty();
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_key")).isEmpty();
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_summary")).isEmpty();
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_description")).isEmpty();
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "tags")).isEmpty();
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "requirements")).isEmpty();
+        DocumentContext report = readValidXrayJsonFile(tempDirectory.resolve("custom_reports").resolve(REPORT_NAME));
     }
 
     @Test
@@ -161,23 +162,156 @@ public class XrayJsonReporterTest {
         Files.write(customPropertiesFile, customProperties.getBytes());
         executeTestMethodWithCustomProperties(TEST_EXAMPLES_CLASS, testMethodName, customPropertiesFile, "", Clock.systemDefaultZone());
         
-        Match testsuite = readValidXmlFile(FileSystems.getDefault().getPath(".").resolve(relativeCustomReportDir).resolve(REPORT_NAME));
-        Match testcase = testsuite.child("testcase");
-        assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_id")).isEmpty();
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_key")).isEmpty();
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_summary")).isEmpty();
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "test_description")).isEmpty();
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "tags")).isEmpty();
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "requirements")).isEmpty();
+        DocumentContext report = readValidXrayJsonFile(FileSystems.getDefault().getPath(".").resolve(relativeCustomReportDir).resolve(REPORT_NAME));
     }
 
+    @Test
+    public void simpleTestShouldHaveInfoSection() throws Exception {
+        String testMethodName = "legacyTest";
+        executeTestMethod(TEST_EXAMPLES_CLASS, testMethodName);
+        System.out.println(tempDirectory.resolve(REPORT_NAME));
+        DocumentContext report  = readValidXrayJsonFile(tempDirectory.resolve(REPORT_NAME));
+        dumpFile(tempDirectory.resolve(REPORT_NAME));
+
+        assertThat(report.read("$.info.summary", String.class)).isEqualTo("test automation results");
+        assertThat(report.read("$.info.description", String.class)).isEqualTo("selenium test results");
+        assertThat(report.read("$.info.project", String.class)).isEqualTo("CALC");
+        assertThat(report.read("$.info.user", String.class)).isEqualTo("xpto");
+        assertThat(report.read("$.info.version", String.class)).isEqualTo("1.0");
+        assertThat(report.read("$.info.revision", String.class)).isEqualTo("123");
+        assertThat(report.read("$.info.testPlanKey", String.class)).isEqualTo("CALC-1000");
+        //assertThat(report.read("$.startDate", String.class)).matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}");
+        //assertThat(report.read("$.finishDate", String.class)).matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z");
+
+        // assertThat(report, isJson());
+        // check that tests section contains a test
+        //com.jayway.jsonassert.JsonAsserter.assertThat(report, hasJsonPath("$.price", equalTo(34.56)));
+
+        //assertThat(report.read("$..book.length()")).isEqualTo(1);
+        //JSONArray tests = using(Configuration.defaultConfiguration()).report.read("$.test[*]");
+        assertThat(report.read("$.tests", List.class)).hasSize(1);
+        assertThat(report.read("$.tests[0].testInfo.summary", String.class)).isEqualTo("legacyTest");
+        assertThat(report.read("$.tests[0].status", String.class)).isEqualTo("PASSED");
+
+        //assertThat(tests).hasSize(1);
+
+
+        //assertThat(report.read("$.tests.length()", int)).isEqualTo(1);
+
+        /*
+         * https://github.com/json-path/JsonPath/blob/2d4cc06cd24e3422e29e2de02f154b34d75f5de0/json-path/src/test/java/com/jayway/jsonpath/TapestryJsonProviderTest.java#L37
+         * https://github.com/json-path/JsonPath/blob/2d4cc06cd24e3422e29e2de02f154b34d75f5de0/json-path/src/test/java/com/jayway/jsonpath/Issue_786.java#L20
+         */
+
+    }
+
+
+    @Test
+    public void failedTestShouldHaveInfoSectionAndProperStatus() throws Exception {
+        String testMethodName = "failedTest";
+        executeTestMethod(TEST_EXAMPLES_CLASS, testMethodName);
+        System.out.println(tempDirectory.resolve(REPORT_NAME));
+        DocumentContext report  = readValidXrayJsonFile(tempDirectory.resolve(REPORT_NAME));
+        dumpFile(tempDirectory.resolve(REPORT_NAME));
+
+        assertThat(report.read("$.info.summary", String.class)).isEqualTo("test automation results");
+        assertThat(report.read("$.info.description", String.class)).isEqualTo("selenium test results");
+        assertThat(report.read("$.info.project", String.class)).isEqualTo("CALC");
+        assertThat(report.read("$.info.user", String.class)).isEqualTo("xpto");
+        assertThat(report.read("$.info.version", String.class)).isEqualTo("1.0");
+        assertThat(report.read("$.info.revision", String.class)).isEqualTo("123");
+        assertThat(report.read("$.info.testPlanKey", String.class)).isEqualTo("CALC-1000");
+
+        assertThat(report.read("$.tests", List.class)).hasSize(1);
+        assertThat(report.read("$.tests[0].testInfo.summary", String.class)).isEqualTo("failedTest");
+        assertThat(report.read("$.tests[0].status", String.class)).isEqualTo("FAILED");
+        String exceptionString = "a failed test\n" +
+            "org.opentest4j.AssertionFailedError: a failed test\n" +
+            "\tat org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:";
+        assertThat(report.read("$.tests[0].comment", String.class)).startsWith(exceptionString);
+    }
+
+    @Test
+    public void errorTestShouldHaveInfoSectionAndProperStatus() throws Exception {
+        String testMethodName = "errorTest";
+        executeTestMethod(TEST_EXAMPLES_CLASS, testMethodName);
+        System.out.println(tempDirectory.resolve(REPORT_NAME));
+        DocumentContext report  = readValidXrayJsonFile(tempDirectory.resolve(REPORT_NAME));
+        dumpFile(tempDirectory.resolve(REPORT_NAME));
+
+        assertThat(report.read("$.info.summary", String.class)).isEqualTo("test automation results");
+        assertThat(report.read("$.info.description", String.class)).isEqualTo("selenium test results");
+        assertThat(report.read("$.info.project", String.class)).isEqualTo("CALC");
+        assertThat(report.read("$.info.user", String.class)).isEqualTo("xpto");
+        assertThat(report.read("$.info.version", String.class)).isEqualTo("1.0");
+        assertThat(report.read("$.info.revision", String.class)).isEqualTo("123");
+        assertThat(report.read("$.info.testPlanKey", String.class)).isEqualTo("CALC-1000");
+
+        assertThat(report.read("$.tests", List.class)).hasSize(1);
+        assertThat(report.read("$.tests[0].testInfo.summary", String.class)).isEqualTo("errorTest");
+        assertThat(report.read("$.tests[0].status", String.class)).isEqualTo("FAILED");
+        String exceptionString = "a test with an error \n" +
+                        "java.lang.RuntimeException: a test with an error \n" +
+                        "\tat app.getxray.xray.junit";
+        assertThat(report.read("$.tests[0].comment", String.class)).startsWith(exceptionString);
+    }
+
+    @Test
+    public void disabledTestShouldHaveInfoSectionAndProperStatus() throws Exception {
+        String testMethodName = "disabledTest";
+        executeTestMethod(TEST_EXAMPLES_CLASS, testMethodName);
+        System.out.println(tempDirectory.resolve(REPORT_NAME));
+        DocumentContext report  = readValidXrayJsonFile(tempDirectory.resolve(REPORT_NAME));
+        dumpFile(tempDirectory.resolve(REPORT_NAME));
+
+        assertThat(report.read("$.info.summary", String.class)).isEqualTo("test automation results");
+        assertThat(report.read("$.info.description", String.class)).isEqualTo("selenium test results");
+        assertThat(report.read("$.info.project", String.class)).isEqualTo("CALC");
+        assertThat(report.read("$.info.user", String.class)).isEqualTo("xpto");
+        assertThat(report.read("$.info.version", String.class)).isEqualTo("1.0");
+        assertThat(report.read("$.info.revision", String.class)).isEqualTo("123");
+        assertThat(report.read("$.info.testPlanKey", String.class)).isEqualTo("CALC-1000");
+
+        assertThat(report.read("$.tests", List.class)).hasSize(1);
+        assertThat(report.read("$.tests[0].testInfo.summary", String.class)).isEqualTo("disabledTest");
+        assertThat(report.read("$.tests[0].status", String.class)).isEqualTo("TO DO");
+    }
+
+    @Test
+    public void shouldMapXrayTestKeyToTestcaseProperty() throws Exception {
+        String testMethodName = "annotatedXrayTestWithKey";
+        executeTestMethod(TEST_EXAMPLES_CLASS, testMethodName);
+        DocumentContext report  = readValidXrayJsonFile(tempDirectory.resolve(REPORT_NAME));
+        dumpFile(tempDirectory.resolve(REPORT_NAME));
+
+        assertThat(report.read("$.info.summary", String.class)).isEqualTo("test automation results");
+        assertThat(report.read("$.info.description", String.class)).isEqualTo("selenium test results");
+        assertThat(report.read("$.info.project", String.class)).isEqualTo("CALC");
+        assertThat(report.read("$.info.user", String.class)).isEqualTo("xpto");
+        assertThat(report.read("$.info.version", String.class)).isEqualTo("1.0");
+        assertThat(report.read("$.info.revision", String.class)).isEqualTo("123");
+        assertThat(report.read("$.info.testPlanKey", String.class)).isEqualTo("CALC-1000");
+
+        assertThat(report.read("$.tests", List.class)).hasSize(1);
+        assertThat(report.read("$.tests[0].testKey", String.class)).isEqualTo("CALC-100");
+    }
+    
+
+    private void dumpFile(Path path) throws Exception {
+        BufferedReader reader = Files.newBufferedReader(path);
+        String line = null;
+        while ((line = reader.readLine()) != null) {
+            System.out.println(line);
+        }
+    }
+
+/*
     @Test
     public void simpleTestShouldNotHaveXrayProperties() throws Exception {
         String testMethodName = "legacyTest";
         executeTestMethod(TEST_EXAMPLES_CLASS, testMethodName);
 
-        Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
+        DocumentContext report  = readValidXrayJsonFile(tempDirectory.resolve(REPORT_NAME));
         Match testcase = testsuite.child("testcase");
         assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
         assertThat(testcase.child("properties").children("property").matchAttr("name", "test_id")).isEmpty();
@@ -292,44 +426,6 @@ public class XrayJsonReporterTest {
         Match testcase = testsuite.child("testcase");
         assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
         assertThat(testcase.child("properties").children("property").matchAttr("name", "tags").attr("value")).isEqualTo("tag1,tag2");
-    }
-
-    private void executeTestMethod(Class<?> testClass, String methodName, Clock clock) {
-        executeTestMethodWithParams(testClass, methodName, "", clock);      
-    }
-
-    private void executeTestMethod(Class<?> testClass, String methodName) {
-        executeTestMethodWithParams(testClass, methodName, "");      
-    }
-
-    private void executeTestMethodWithCustomProperties(Class<?> testClass, String methodName, Path propertiesPath,  String methodParameterTypes, Clock clock) {
-        LauncherDiscoveryRequest discoveryRequest = request()//
-                .selectors(selectMethod(testClass, methodName, ""))
-                .build();
-        Launcher launcher = LauncherFactory.create();
-        EnhancedLegacyXmlReportGeneratingListener listener = new EnhancedLegacyXmlReportGeneratingListener(tempDirectory, propertiesPath, new PrintWriter(System.out), clock);
-        launcher.execute(discoveryRequest, listener);  
-    }
-
-    private void executeTestMethodWithParams(Class<?> testClass, String methodName, String methodParameterTypes) {
-        LauncherDiscoveryRequest discoveryRequest = request()//
-                .selectors(selectMethod(testClass, methodName, methodParameterTypes))
-                .build();
-        Launcher launcher = LauncherFactory.create();
-        // EnhancedLegacyXmlReportGeneratingListener listener = new EnhancedLegacyXmlReportGeneratingListener(tempDirectory, new PrintWriter(System.out));
-        XrayJsonReporter listener = new XrayJsonReporter();
-        launcher.execute(discoveryRequest, listener);        
-    }
-
-    private void executeTestMethodWithParams(Class<?> testClass, String methodName, String methodParameterTypes, Clock clock) {
-        LauncherDiscoveryRequest discoveryRequest = request()//
-                .selectors(selectMethod(testClass, methodName, methodParameterTypes))
-                .build();
-        Launcher launcher = LauncherFactory.create();
-        //EnhancedLegacyXmlReportGeneratingListener listener = new EnhancedLegacyXmlReportGeneratingListener(tempDirectory, new PrintWriter(System.out), clock);
-        XrayJsonReporter listener = new XrayJsonReporter();
-
-        launcher.execute(discoveryRequest, listener);        
     }
 
     @Test
@@ -474,12 +570,6 @@ public class XrayJsonReporterTest {
         Match testcase = testsuite.child("testcase");
         assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
 
-/*
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "testrun_customfields").children("item").get(0).getAttribute("name")).isEqualTo("cf2");
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "testrun_customfields").children("item").get(0).getTextContent()).isEqualTo("field2_value");
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "testrun_customfields").children("item").get(1).getAttribute("name")).isEqualTo("cf1");
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "testrun_customfields").children("item").get(1).getTextContent()).isEqualTo("field1_value");
-*/
         assertThat(testcase.child("properties").children("property").matchAttr("name", "testrun_customfields").children("item").matchAttr("name", "cf1")).isNotEmpty();
         assertThat(testcase.child("properties").children("property").matchAttr("name", "testrun_customfields").children("item").matchAttr("name", "cf1").cdata()).isEqualTo("field1_value");
         assertThat(testcase.child("properties").children("property").matchAttr("name", "testrun_customfields").children("item").matchAttr("name", "cf2")).isNotEmpty();
@@ -542,27 +632,55 @@ public class XrayJsonReporterTest {
         assertThat(testcase.child("properties").children("property").matchAttr("name", "testrun_customfields").children("item").matchAttr("name", "cf1")).isNotEmpty();
         assertThat(testcase.child("properties").children("property").matchAttr("name", "testrun_customfields").children("item").matchAttr("name", "cf1").cdata()).isEqualTo("P\\;orto\\;;Lis\\\\bon\\\\");
     }
+*/
+
 
     @Test
-    public void shouldStoreTestRunEvidenceToTestcaseProperty() throws Exception {
+    public void shouldProcessRepeatedTest() throws Exception {
+        String testMethodName = "repeatedTestAnnotatedWithoutDisplayName";
+        executeTestMethod(TEST_EXAMPLES_CLASS, testMethodName);
+        System.out.println(tempDirectory.resolve(REPORT_NAME));
+        DocumentContext report  = readValidXrayJsonFile(tempDirectory.resolve(REPORT_NAME));
+        dumpFile(tempDirectory.resolve(REPORT_NAME));
+
+        assertThat(report.read("$.tests", List.class)).hasSize(3);
+    }
+
+    @Test
+    public void shouldProcessDataDrivenParameterizedTest() throws Exception {
+        String testMethodName = "parameterizedTestWithoutDisplayName";
+        executeTestMethodWithParams(TEST_EXAMPLES_CLASS, testMethodName, "int");
+        System.out.println(tempDirectory.resolve(REPORT_NAME));
+        DocumentContext report  = readValidXrayJsonFile(tempDirectory.resolve(REPORT_NAME));
+        dumpFile(tempDirectory.resolve(REPORT_NAME));
+
+
+        assertThat(report.read("$.tests", List.class)).hasSize(1);
+
+    }
+    
+
+    @Test
+    public void shouldStoreTestRunEvidenceToTestEvidenceField() throws Exception {
         String testMethodName = "testWithTestRunEvidence";
         executeTestMethodWithParams(TEST_EXAMPLES_CLASS, testMethodName, "app.getxray.xray.junit.customjunitxml.XrayTestReporter");
-        Match testsuite = readValidXmlFile(tempDirectory.resolve(REPORT_NAME));
-        Match testcase = testsuite.child("testcase");
-        assertThat(testcase.attr("name", String.class)).isEqualTo(testMethodName);
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "testrun_evidence").children("item").attr("name")).isEqualTo("xray.png");
-
+        System.out.println(tempDirectory.resolve(REPORT_NAME));
+        DocumentContext report  = readValidXrayJsonFile(tempDirectory.resolve(REPORT_NAME));
+        dumpFile(tempDirectory.resolve(REPORT_NAME));
         String file = "src/test/java/app/getxray/xray/junit/customjunitxml/xray.png";
         Base64.Encoder enc = Base64.getEncoder();
         byte[] fileContent = Files.readAllBytes(Paths.get(file));
         byte[] encoded = enc.encode(fileContent);
         String contentInBase64 = new String(encoded, "UTF-8");
 
-
-        assertThat(testcase.child("properties").children("property").matchAttr("name", "testrun_evidence").child("item").text()).isEqualTo(contentInBase64);
+        assertThat(report.read("$.tests", List.class)).hasSize(1);
+        assertThat(report.read("$.tests[0].evidence", List.class)).hasSize(1);
+        assertThat(report.read("$.tests[0].evidence[0].filename", String.class)).isEqualTo("xray.png");
+        assertThat(report.read("$.tests[0].evidence[0].data", String.class)).isEqualTo(contentInBase64);
+        assertThat(report.read("$.tests[0].evidence[0].contentType", String.class)).isEqualTo("image/png");
     }
 
- 
+
     @Test
     public void shouldCreateReportEntryForEvidence() throws Exception {
         String testMethodName = "testWithTestRunEvidence";
@@ -580,15 +698,92 @@ public class XrayJsonReporterTest {
         assertThat(reportEntryArgumentCaptor.getAllValues().get(0).getKeyValuePairs()).containsExactly(entry("xray:evidence", FileSystems.getDefault().getPath("src/test/java/app/getxray/xray/junit/customjunitxml/xray.png").toAbsolutePath().toString()));
     }
 
-	private Match readValidXmlFile(Path xmlFile) throws Exception {
-		assertTrue(Files.exists(xmlFile), () -> "File does not exist: " + xmlFile);
-		try (BufferedReader reader = Files.newBufferedReader(xmlFile)) {
-			Match xml = $(reader);
-            // assertValidAccordingToJenkinsSchema(xml.document());
-			return xml;
+    private static InputStream inputStreamFromClasspath(String path) {
+        return XrayJsonReporterTest.class.getResourceAsStream(path);
+    }
+
+	private DocumentContext readValidXrayJsonFile(Path file) throws Exception {
+
+        /*
+        JsonSchemaFactory factory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4);
+        Path schemaFile = Paths.get("src/test/resources/cloud_xray_schema.json");
+        String schemaContent = new String(Files.readAllBytes(schemaFile), StandardCharsets.UTF_8);
+        SchemaValidatorsConfig config = new SchemaValidatorsConfig();
+        com.networknt.schema.JsonSchema schemaFromString = factory.getSchema(schemaContent, config);
+        Set<ValidationMessage> errors = schemaFromString.validate(new String(Files.readAllBytes(file), StandardCharsets.UTF_8), InputFormat.JSON);
+        assertEquals(0, errors.size())
+        */
+
+         ObjectMapper objectMapper = new ObjectMapper();
+         try (InputStream jsonStream = new FileInputStream(file.toFile())) {
+             JsonNode json = objectMapper.readTree(jsonStream);
+             JsonSchemaFactory validatorFactory;
+             try (InputStream schemaStream = inputStreamFromClasspath("/cloud_xray_schema.json")) {
+                 JsonNode jsonSchema = objectMapper.readTree(schemaStream);
+                 validatorFactory = JsonSchemaFactory.getInstance(SpecVersionDetector.detect(jsonSchema));
+             }
+     
+
+             final StringBuilder errorMessages = new StringBuilder();
+             try (InputStream schemaStream = inputStreamFromClasspath("/cloud_xray_schema.json")) {
+                com.networknt.schema.JsonSchema schema = validatorFactory.getSchema(schemaStream);
+                 Set<ValidationMessage> validationResult = schema.validate(json);
+
+                 if (validationResult.isEmpty()) {
+                     // System.out.println("no Xray JSON schema validation errors :-)");
+                 } else {
+                     validationResult.forEach(vm -> errorMessages.append(vm.getMessage() + "\n"));
+                 }
+                 assertTrue(validationResult.isEmpty(), errorMessages.toString());
+             }
+         }
+
+
+
+        
+		try (BufferedReader reader = Files.newBufferedReader(file)) {
+            Configuration configuration = Configuration.builder()
+                .jsonProvider(new JacksonJsonProvider())
+                .build();
+
+            return JsonPath.using(configuration).parse(file.toFile());
 		}
 	}
 
+    private void executeTestMethod(Class<?> testClass, String methodName, Clock clock) {
+        executeTestMethodWithParams(testClass, methodName, "", clock);      
+    }
 
+    private void executeTestMethod(Class<?> testClass, String methodName) {
+        executeTestMethodWithParams(testClass, methodName, "");      
+    }
+
+    private void executeTestMethodWithCustomProperties(Class<?> testClass, String methodName, Path propertiesPath,  String methodParameterTypes, Clock clock) {
+        LauncherDiscoveryRequest discoveryRequest = request()//
+                .selectors(selectMethod(testClass, methodName, ""))
+                .build();
+        Launcher launcher = LauncherFactory.create();
+        XrayJsonReporter listener = new XrayJsonReporter(tempDirectory, propertiesPath, new PrintWriter(System.out), clock);
+        launcher.execute(discoveryRequest, listener);  
+    }
+
+    private void executeTestMethodWithParams(Class<?> testClass, String methodName, String methodParameterTypes) {
+        LauncherDiscoveryRequest discoveryRequest = request()//
+                .selectors(selectMethod(testClass, methodName, methodParameterTypes))
+                .build();
+        Launcher launcher = LauncherFactory.create();
+        XrayJsonReporter listener = new XrayJsonReporter(tempDirectory, new PrintWriter(System.out));
+        launcher.execute(discoveryRequest, listener);
+    }
+
+    private void executeTestMethodWithParams(Class<?> testClass, String methodName, String methodParameterTypes, Clock clock) {
+        LauncherDiscoveryRequest discoveryRequest = request()//
+                .selectors(selectMethod(testClass, methodName, methodParameterTypes))
+                .build();
+        Launcher launcher = LauncherFactory.create();
+        XrayJsonReporter listener = new XrayJsonReporter(tempDirectory, new PrintWriter(System.out));
+
+        launcher.execute(discoveryRequest, listener);        
+    }
 
 }

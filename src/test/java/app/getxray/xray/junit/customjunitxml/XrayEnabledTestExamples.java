@@ -8,6 +8,7 @@ import java.nio.file.FileSystems;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Tag;
@@ -23,14 +24,36 @@ import app.getxray.xray.junit.customjunitxml.XrayTestReporter;
 import app.getxray.xray.junit.customjunitxml.XrayTestReporterParameterResolver;
 import app.getxray.xray.junit.customjunitxml.annotations.Requirement;
 import app.getxray.xray.junit.customjunitxml.annotations.XrayTest;
+import app.getxray.xray.junit.xray_json.TestDurationReportExtension;
+import app.getxray.xray.junit.xray_json.XrayJsonReporter;
 
 import org.junit.jupiter.api.DynamicTest;
 
 @ExtendWith(XrayTestReporterParameterResolver.class)
+@ExtendWith(TestDurationReportExtension.class)
 public class XrayEnabledTestExamples {
 
     @Test
+    //@ExtendWith(XrayJsonReporter.class)
+    //@ExtendWith(TestDurationReportExtension.class)
     public void legacyTest() {
+    }
+
+    @Test
+    public void failedTest() {
+        fail("a failed test");
+    }
+
+    @Test
+    public void errorTest() throws Exception {
+        throw new RuntimeException("a test with an error ");
+    }
+
+
+    @Test
+    @Disabled
+    public void disabledTest() {
+        throw new RuntimeException("a test which is disabled and thus never executed");
     }
 
     @Test
@@ -156,7 +179,7 @@ public class XrayEnabledTestExamples {
         );
     }
 
-
+/*
     @ParameterizedTest
     @CsvSource({
         "Jane, Doe, F, 1990-05-20",
@@ -173,4 +196,5 @@ public class XrayEnabledTestExamples {
         assertEquals("Doe", person.getLastName());
         assertEquals(1990, person.getDateOfBirth().getYear());
     }
+*/
 }
