@@ -11,6 +11,7 @@
 package app.getxray.xray.junit.customjunitxml;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
@@ -233,6 +234,7 @@ class XmlReportWriter {
 
 		final Optional<TestSource> testSource = testIdentifier.getSource();
 		final Optional<Method> testMethod = testSource.flatMap(this::getTestMethod);
+		final Class testClass = ((MethodSource)testSource.get()).getJavaClass();
 		Optional<XrayTest> xrayTest = AnnotationSupport.findAnnotation(testMethod, XrayTest.class);
 		Optional<Requirement> requirement = AnnotationSupport.findAnnotation(testMethod, Requirement.class);
 		if (reportOnlyAnnotatedTests && (!requirement.isPresent() && !xrayTest.isPresent())) {
@@ -301,13 +303,16 @@ class XmlReportWriter {
 
 		Optional<TestFactory> dynamicTest = AnnotationSupport.findAnnotation(testMethod, TestFactory.class);
 		Optional<DisplayName> displayName = AnnotationSupport.findAnnotation(testMethod, DisplayName.class);
+		Optional<DisplayNameGeneration> displayNameGenerator = AnnotationSupport.findAnnotation(testClass, DisplayNameGeneration.class);
+
+		// this logic should be improved/simplified; the displayNameGererator logic isnt handling all cases, inclusing if it was set globally
 		if ( ((test_summary == null) || (test_summary.isEmpty())) && (displayName.isPresent()) ) {
-			//test_summary = testIdentifier.getDisplayName();
 			test_summary = displayName.get().value();
 		}
-		if ( ((test_summary == null) || (test_summary.isEmpty())) && (dynamicTest.isPresent()) ) {
+		if ( ((test_summary == null) || (test_summary.isEmpty())) && (dynamicTest.isPresent() || displayNameGenerator.isPresent()) ) {
 			test_summary = testIdentifier.getDisplayName();
 		}
+
 		if ((test_summary != null) && (!test_summary.isEmpty())) {
 			addProperty(writer, "test_summary", test_summary);
 		}
