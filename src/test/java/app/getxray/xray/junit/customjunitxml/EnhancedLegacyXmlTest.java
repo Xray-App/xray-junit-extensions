@@ -30,6 +30,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.nio.channels.Selector;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -40,6 +41,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Base64;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import javax.xml.XMLConstants;
 import javax.xml.transform.dom.DOMSource;
@@ -52,6 +54,7 @@ import org.junit.jupiter.api.Disabled;
 //import org.junit.Test;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.platform.engine.discovery.DiscoverySelectors;
 import org.junit.platform.engine.reporting.ReportEntry;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
@@ -63,12 +66,14 @@ import org.mockito.InOrder;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import app.getxray.xray.junit.customjunitxml.EnhancedLegacyXmlReportGeneratingListener;
 
 public class EnhancedLegacyXmlTest {
 
     private static final Class TEST_EXAMPLES_CLASS = XrayEnabledTestExamples.class;
     private static final Class CUSTOM_DISPLAYNAME_CLASS = XrayEnabledTestCustomDisplayName.class;
+    private static final Class BASIC_CLASS = BasicTestExample.class;
+    private static final Class SIMPLE_CLASS = SimpleTestExample.class;
+
 
     private static final Runnable FAILING_BLOCK = () -> fail("should fail");
     private static final Runnable SUCCEEDING_TEST = () -> {
@@ -77,6 +82,29 @@ public class EnhancedLegacyXmlTest {
 	@TempDir
 	Path tempDirectory;
     private static final String REPORT_NAME = "TEST-junit-jupiter.xml";
+
+    @Test
+    public void shouldReportPerTestClass() throws Exception {
+        String customProperties = "#report_filename=custom-report-junit\n# report_directory=reports\nreports_per_class=true\n";
+        Path customPropertiesFile = Files.createTempFile("xray-junit-extensions", ".properties");
+        Files.write(customPropertiesFile, customProperties.getBytes());
+
+        executeTestClasses(new Class[] { BASIC_CLASS, SIMPLE_CLASS }, customPropertiesFile, Clock.systemDefaultZone());
+
+        String reportName = "TEST-app.getxray.xray.junit.customjunitxml.BasicTestExample.xml";
+        Match testsuite = readValidXmlFile(tempDirectory.resolve(reportName));
+        // assert that suite childrens contains 2 testcase elements
+        assertThat(testsuite.children("testcase")).hasSize(2);
+        assertThat(testsuite.children("testcase").matchAttr("name", "someBasicTest")).isNotEmpty();
+        assertThat(testsuite.children("testcase").matchAttr("name", "anotherBasicTest")).isNotEmpty();
+
+
+        reportName = "TEST-app.getxray.xray.junit.customjunitxml.SimpleTestExample.xml";
+        testsuite = readValidXmlFile(tempDirectory.resolve(reportName));
+        assertThat(testsuite.children("testcase")).hasSize(2);
+        assertThat(testsuite.children("testcase").matchAttr("name", "someSimpleTest")).isNotEmpty();
+        assertThat(testsuite.children("testcase").matchAttr("name", "anotherSimpleTest")).isNotEmpty();
+    }
 
 
     @Test
@@ -420,6 +448,17 @@ public class EnhancedLegacyXmlTest {
         //launcher.registerTestExecutionListeners(listener);
         launcher.execute(discoveryRequest, listener);        
     }
+
+    private void executeTestClasses(Class<?>[] testClasses, Path propertiesPath,Clock clock) {
+        // select several classes to execute in junit 5
+        LauncherDiscoveryRequest discoveryRequest = request()
+                .selectors(Arrays.stream(testClasses).map(DiscoverySelectors::selectClass).collect(Collectors.toList()))
+                .build();
+        Launcher launcher = LauncherFactory.create();
+        EnhancedLegacyXmlReportGeneratingListener listener = new EnhancedLegacyXmlReportGeneratingListener(tempDirectory, propertiesPath, new PrintWriter(System.out), clock);
+        launcher.execute(discoveryRequest, listener);        
+    }
+
 
     @Test
     public void shouldMapDisplayNameToTestSummaryProperty() throws Exception {
