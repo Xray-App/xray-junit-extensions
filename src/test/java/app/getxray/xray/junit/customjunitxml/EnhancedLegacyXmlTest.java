@@ -93,11 +93,9 @@ public class EnhancedLegacyXmlTest {
 
         String reportName = "TEST-app.getxray.xray.junit.customjunitxml.BasicTestExample.xml";
         Match testsuite = readValidXmlFile(tempDirectory.resolve(reportName));
-        // assert that suite childrens contains 2 testcase elements
         assertThat(testsuite.children("testcase")).hasSize(2);
         assertThat(testsuite.children("testcase").matchAttr("name", "someBasicTest")).isNotEmpty();
         assertThat(testsuite.children("testcase").matchAttr("name", "anotherBasicTest")).isNotEmpty();
-
 
         reportName = "TEST-app.getxray.xray.junit.customjunitxml.SimpleTestExample.xml";
         testsuite = readValidXmlFile(tempDirectory.resolve(reportName));
