@@ -64,6 +64,7 @@ public class EnhancedLegacyXmlReportGeneratingListener implements TestExecutionL
 	private String reportFilename = null;
 	boolean addTimestampToReportFilename = false;
 	boolean reportOnlyAnnotatedTests = false;
+	boolean reportsPerClass = false;
 
 	private XmlReportData reportData;
 
@@ -93,6 +94,7 @@ public class EnhancedLegacyXmlReportGeneratingListener implements TestExecutionL
 				}
 				this.addTimestampToReportFilename = "true".equals(properties.getProperty("add_timestamp_to_report_filename"));
 				this.reportOnlyAnnotatedTests = "true".equals(properties.getProperty("report_only_annotated_tests", "false"));
+				this.reportsPerClass = "true".equals(properties.getProperty("reports_per_class", "false"));
 			} else {
 				if (reportsDir == null) {
 					this.reportsDir = FileSystems.getDefault().getPath(DEFAULT_REPORTS_DIR);
@@ -155,7 +157,12 @@ public class EnhancedLegacyXmlReportGeneratingListener implements TestExecutionL
 
 	private void writeXmlReportInCaseOfRoot(TestIdentifier testIdentifier) {
 		if (isRoot(testIdentifier)) {
-			String rootName = UniqueId.parse(testIdentifier.getUniqueId()).getSegments().get(0).getValue();
+			String rootName;
+			if (reportsPerClass) {
+				rootName = testIdentifier.getLegacyReportingName();
+			} else {
+				rootName = UniqueId.parse(testIdentifier.getUniqueId()).getSegments().get(0).getValue();
+			}
 			writeXmlReportSafely(testIdentifier, rootName);
 		}
 	}
@@ -184,7 +191,11 @@ public class EnhancedLegacyXmlReportGeneratingListener implements TestExecutionL
 	}
 
 	private boolean isRoot(TestIdentifier testIdentifier) {
-		return !testIdentifier.getParentId().isPresent();
+		 if (reportsPerClass) {
+			return testIdentifier.getParentId().isPresent() && testIdentifier.getParentIdObject().get().getSegments().size() == 1;
+		 } else {
+			return !testIdentifier.getParentId().isPresent();
+		 }
 	}
 
 	private void printException(String message, Exception exception) {

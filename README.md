@@ -49,7 +49,7 @@ Add the following dependency to your pom.xml:
         <dependency>
           <groupId>app.getxray</groupId>
           <artifactId>xray-junit-extensions</artifactId>
-          <version>0.7.2</version>
+          <version>0.8.0</version>
           <scope>test</scope>
         </dependency>
 ```
@@ -62,7 +62,7 @@ If you want, you may configure certain aspects of this extension. The defaults s
 - `report_directory`: the directory where to generate the report, in relative or absolute format. Default is "target"
 - `add_timestamp_to_report_filename`: add a timestamp based suffix to the report. Default is "false".
 - `report_only_annotated_tests`: only include tests annotated with @XrayTest or @Requirement. Default is "false".
-
+- `reports_per_class`: generate JUnit XML reports per test class instead of a single report with all results; if true, `report_filename`, and `add_timestamp_to_report_filename` are ignored. Default is "false". 
 
 Example:
 
@@ -71,6 +71,7 @@ report_filename=custom-report-junit
 report_directory=reports
 add_timestamp_to_report_filename=true
 report_only_annotated_tests=false
+reports_per_class=false
 ```
 
 ## How to use
