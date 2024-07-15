@@ -4,7 +4,6 @@
 [![Known Vulnerabilities](https://snyk.io/test/github/Xray-App/xray-junit-extensions/badge.svg)](https://snyk.io/test/github/Xray-App/xray-junit-extensions)
 ![code coverage](
 https://raw.githubusercontent.com/Xray-App/xray-junit-extensions/main/.github/badges/jacoco.svg)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/686a52b4d223469d894af90071ee93d2)](https://www.codacy.com/gh/Xray-App/xray-junit-extensions/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Xray-App/xray-junit-extensions&amp;utm_campaign=Badge_Grade)
 [![license](https://img.shields.io/badge/License-EPL%202.0-green.svg)](https://opensource.org/licenses/EPL-2.0)
 [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/Xray-App/community)
 [![Maven Central Version](https://img.shields.io/maven-central/v/app.getxray/xray-junit-extensions)](https://central.sonatype.com/artifact/app.getxray/xray-junit-extensions/)
