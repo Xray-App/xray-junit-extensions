@@ -104,6 +104,42 @@ public class EnhancedLegacyXmlTest {
         assertThat(testsuite.children("testcase").matchAttr("name", "anotherSimpleTest")).isNotEmpty();
     }
 
+    @Test
+    public void shouldUseCustomMetadataReader() throws Exception {
+        String customProperties = "test_metadata_reader=" + CustomXrayTestMetadataReader.class.getName() + "\n";
+        Path customPropertiesFile = Files.createTempFile("xray-junit-extensions", ".properties");
+        Files.write(customPropertiesFile, customProperties.getBytes());
+
+        executeTestClasses(new Class[]{BASIC_CLASS}, customPropertiesFile, Clock.systemDefaultZone());
+
+        String reportName = "TEST-junit-jupiter.xml";
+        Match testsuite = readValidXmlFile(tempDirectory.resolve(reportName));
+        assertThat(testsuite.children("testcase")).hasSize(2);
+
+        Match someBasicTestTestCase = testsuite.children("testcase").matchAttr("name", "someBasicTest");
+        assertThat(someBasicTestTestCase).isNotEmpty();
+        Match someBasicTestTestCaseProps = someBasicTestTestCase.children("properties").children("property");
+        assertThat(someBasicTestTestCaseProps.matchAttr("name", "test_id").attr("value"))
+                .isEqualTo("ID:someBasicTest");
+        assertThat(someBasicTestTestCaseProps.matchAttr("name", "test_key").attr("value"))
+                .isEqualTo("KEY:someBasicTest");
+        assertThat(someBasicTestTestCaseProps.matchAttr("name", "test_summary").attr("value"))
+                .isEqualTo("SUMMARY:someBasicTest");
+        assertThat(someBasicTestTestCaseProps.matchAttr("name", "test_description").text())
+                .isEqualTo("DESCRIPTION:someBasicTest");
+
+        Match anotherBasicTestTestCase = testsuite.children("testcase").matchAttr("name", "anotherBasicTest");
+        assertThat(anotherBasicTestTestCase).isNotEmpty();
+        Match anotherBasicTestTestCaseProps = anotherBasicTestTestCase.children("properties").children("property");
+        assertThat(anotherBasicTestTestCaseProps.matchAttr("name", "test_id").attr("value"))
+                .isEqualTo("ID:anotherBasicTest");
+        assertThat(anotherBasicTestTestCaseProps.matchAttr("name", "test_key").attr("value"))
+                .isEqualTo("KEY:anotherBasicTest");
+        assertThat(anotherBasicTestTestCaseProps.matchAttr("name", "test_summary").attr("value"))
+                .isEqualTo("SUMMARY:anotherBasicTest");
+        assertThat(anotherBasicTestTestCaseProps.matchAttr("name", "test_description").text())
+                .isEqualTo("DESCRIPTION:anotherBasicTest");
+    }
 
     @Test
     public void shouldSupportCustomReportNames() throws Exception {
