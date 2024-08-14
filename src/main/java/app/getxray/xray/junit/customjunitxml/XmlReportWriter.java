@@ -278,23 +278,23 @@ class XmlReportWriter {
 			addProperty(writer, "requirements", String.join(",", requirements));
 		}
 
-        Optional<String> test_key = xrayTestMetadataReader.getKey(testIdentifier);
-        if (test_key.isPresent()) {
-            addProperty(writer, "test_key", test_key.get());
+        Optional<String> testKeyOpt = xrayTestMetadataReader.getKey(testIdentifier);
+        if (testKeyOpt.isPresent()) {
+            addProperty(writer, "test_key", testKeyOpt.get());
         }
-        Optional<String> test_id = xrayTestMetadataReader.getId(testIdentifier);
-        if (test_id.isPresent()) {
-            addProperty(writer, "test_id", test_id.get());
-        }
-
-        Optional<String> test_description = xrayTestMetadataReader.getDescription(testIdentifier);
-        if (test_description.isPresent()) {
-            addPropertyWithInnerContent(writer, "test_description", test_description.get());
+        Optional<String> testIdOpt = xrayTestMetadataReader.getId(testIdentifier);
+        if (testIdOpt.isPresent()) {
+            addProperty(writer, "test_id", testIdOpt.get());
         }
 
-        Optional<String> test_summary = xrayTestMetadataReader.getSummary(testIdentifier);
-		if (test_summary.isPresent()) {
-			addProperty(writer, "test_summary", test_summary.get());
+        Optional<String> testDescriptionOpt = xrayTestMetadataReader.getDescription(testIdentifier);
+        if (testDescriptionOpt.isPresent()) {
+            addPropertyWithInnerContent(writer, "test_description", testDescriptionOpt.get());
+        }
+
+        Optional<String> testSummaryOpt = xrayTestMetadataReader.getSummary(testIdentifier);
+		if (testSummaryOpt.isPresent()) {
+			addProperty(writer, "test_summary", testSummaryOpt.get());
 		}
 
 		List<String> tags = testIdentifier.getTags().stream().map(TestTag::getName).map(String::trim)

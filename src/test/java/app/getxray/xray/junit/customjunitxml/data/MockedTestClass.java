@@ -27,32 +27,32 @@ public class MockedTestClass {
     )
     @Requirement({"REQ-1", "REQ-2"})
     public void annotatedWithValues() {
-
+        // it's a dummy test definition, no implementation needed
     }
 
     @XrayTest
     @Requirement({})
     public void annotatedWithEmptyValues() {
-
+        // it's a dummy test definition, no implementation needed
     }
 
     public void notAnnotatedTest() {
-
+        // it's a dummy test definition, no implementation needed
     }
 
     @DisplayName("display name")
     public void annotatedWithDisplayName() {
-
+        // it's a dummy test definition, no implementation needed
     }
 
     @XrayTest(summary = "xray summary")
     @DisplayName("display name")
     public void annotatedWithXrayTestAndDisplayName() {
-
+        // it's a dummy test definition, no implementation needed
     }
 
     @TestFactory
     public void withTestFactory() {
-
+        // it's a dummy test definition, no implementation needed
     }
 }

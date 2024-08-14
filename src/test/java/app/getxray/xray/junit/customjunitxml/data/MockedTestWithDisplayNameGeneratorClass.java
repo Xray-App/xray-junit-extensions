@@ -40,7 +40,7 @@ public class MockedTestWithDisplayNameGeneratorClass {
 
     @XrayTest()
     public void withDisplayNameGenerator() {
-
+        // it's a dummy test definition, no implementation needed
     }
 
 }

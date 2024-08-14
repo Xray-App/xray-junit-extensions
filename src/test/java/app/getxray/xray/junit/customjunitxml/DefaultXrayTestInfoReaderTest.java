@@ -32,13 +32,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DefaultXrayTestInfoReaderTest {
 
     private final XrayTestMetadataReader xrayTestMetadataReader = new DefaultXrayTestMetadataReader();
-    private static TestDescriptor XRAYTEST_ANNOTATED;
-    private static TestDescriptor XRAYTEST_EMPTY_ANNOTATION;
-    private static TestDescriptor NOT_ANNOTATED;
-    private static TestDescriptor DISPLAY_NAME_ANNOTATED;
-    private static TestDescriptor XRAYTEST_AND_DISPLAY_NAME_ANNOTATED;
-    private static TestDescriptor WITH_DISPLAY_NAME_GENERATOR;
-    private static TestDescriptor WITH_TEST_FACTORY;
+    private static TestDescriptor testWithXraytestAnnotation;
+    private static TestDescriptor testWithXraytestEmptyAnnotation;
+    private static TestDescriptor testNotAnnotated;
+    private static TestDescriptor testWithDisplayNameAnnotation;
+    private static TestDescriptor testWithXraytestAndDisplayNameAnnotation;
+    private static TestDescriptor testWithDisplayNameGenerator;
+    private static TestDescriptor testWithTestFactoryAnnotation;
 
     @BeforeAll
     static void setUp() throws NoSuchMethodException {
@@ -66,43 +66,43 @@ class DefaultXrayTestInfoReaderTest {
                 }
         );
 
-        XRAYTEST_ANNOTATED = new TestMethodTestDescriptor(
+        testWithXraytestAnnotation = new TestMethodTestDescriptor(
                 UniqueId.forEngine("foo"),
                 MockedTestClass.class,
                 MockedTestClass.class.getMethod("annotatedWithValues"),
                 jupiterConfiguration
         );
-        XRAYTEST_EMPTY_ANNOTATION = new TestMethodTestDescriptor(
+        testWithXraytestEmptyAnnotation = new TestMethodTestDescriptor(
                 UniqueId.forEngine("foo"),
                 MockedTestClass.class,
                 MockedTestClass.class.getMethod("annotatedWithEmptyValues"),
                 jupiterConfiguration
         );
-        NOT_ANNOTATED = new TestMethodTestDescriptor(
+        testNotAnnotated = new TestMethodTestDescriptor(
                 UniqueId.forEngine("foo"),
                 MockedTestClass.class,
                 MockedTestClass.class.getMethod("notAnnotatedTest"),
                 jupiterConfiguration
         );
-        DISPLAY_NAME_ANNOTATED = new TestMethodTestDescriptor(
+        testWithDisplayNameAnnotation = new TestMethodTestDescriptor(
                 UniqueId.forEngine("foo"),
                 MockedTestClass.class,
                 MockedTestClass.class.getMethod("annotatedWithDisplayName"),
                 jupiterConfiguration
         );
-        XRAYTEST_AND_DISPLAY_NAME_ANNOTATED = new TestMethodTestDescriptor(
+        testWithXraytestAndDisplayNameAnnotation = new TestMethodTestDescriptor(
                 UniqueId.forEngine("foo"),
                 MockedTestClass.class,
                 MockedTestClass.class.getMethod("annotatedWithXrayTestAndDisplayName"),
                 jupiterConfiguration
         );
-        WITH_DISPLAY_NAME_GENERATOR = new TestMethodTestDescriptor(
+        testWithDisplayNameGenerator = new TestMethodTestDescriptor(
                 UniqueId.forEngine("foo"),
                 MockedTestWithDisplayNameGeneratorClass.class,
                 MockedTestWithDisplayNameGeneratorClass.class.getMethod("withDisplayNameGenerator"),
                 jupiterConfiguration
         );
-        WITH_TEST_FACTORY = new TestMethodTestDescriptor(
+        testWithTestFactoryAnnotation = new TestMethodTestDescriptor(
                 UniqueId.forEngine("foo"),
                 MockedTestClass.class,
                 MockedTestClass.class.getMethod("withTestFactory"),
@@ -113,7 +113,7 @@ class DefaultXrayTestInfoReaderTest {
     @Test
     void shouldReturnKeyFromXrayTestAnnotation() {
         // GIVEN
-        TestIdentifier testIdentifier = TestIdentifier.from(XRAYTEST_ANNOTATED);
+        TestIdentifier testIdentifier = TestIdentifier.from(testWithXraytestAnnotation);
         // WHEN
         Optional<String> keyOpt = xrayTestMetadataReader.getKey(testIdentifier);
         // THEN
@@ -124,7 +124,7 @@ class DefaultXrayTestInfoReaderTest {
     @Test
     void shouldReturnOptionalEmptyFromXrayTestAnnotationWithEmptyKey() {
         // GIVEN
-        TestIdentifier testIdentifier = TestIdentifier.from(XRAYTEST_EMPTY_ANNOTATION);
+        TestIdentifier testIdentifier = TestIdentifier.from(testWithXraytestEmptyAnnotation);
         // WHEN
         Optional<String> keyOpt = xrayTestMetadataReader.getKey(testIdentifier);
         // THEN
@@ -135,7 +135,7 @@ class DefaultXrayTestInfoReaderTest {
     @Test
     void shouldReturnOptionalEmptyKeyWhenMethodNotAnnotated() {
         // GIVEN
-        TestIdentifier testIdentifier = TestIdentifier.from(NOT_ANNOTATED);
+        TestIdentifier testIdentifier = TestIdentifier.from(testNotAnnotated);
         // WHEN
         Optional<String> keyOpt = xrayTestMetadataReader.getKey(testIdentifier);
         // THEN
@@ -146,7 +146,7 @@ class DefaultXrayTestInfoReaderTest {
     @Test
     void shouldReturnIdFromXrayTestAnnotation() {
         // GIVEN
-        TestIdentifier testIdentifier = TestIdentifier.from(XRAYTEST_ANNOTATED);
+        TestIdentifier testIdentifier = TestIdentifier.from(testWithXraytestAnnotation);
         // WHEN
         Optional<String> idOpt = xrayTestMetadataReader.getId(testIdentifier);
         // THEN
@@ -157,7 +157,7 @@ class DefaultXrayTestInfoReaderTest {
     @Test
     void shouldReturnOptionalEmptyFromXrayTestAnnotationWithEmptyId() {
         // GIVEN
-        TestIdentifier testIdentifier = TestIdentifier.from(XRAYTEST_EMPTY_ANNOTATION);
+        TestIdentifier testIdentifier = TestIdentifier.from(testWithXraytestEmptyAnnotation);
         // WHEN
         Optional<String> idOpt = xrayTestMetadataReader.getId(testIdentifier);
         // THEN
@@ -168,7 +168,7 @@ class DefaultXrayTestInfoReaderTest {
     @Test
     void shouldReturnOptionalEmptyIdWhenMethodNotAnnotated() {
         // GIVEN
-        TestIdentifier testIdentifier = TestIdentifier.from(NOT_ANNOTATED);
+        TestIdentifier testIdentifier = TestIdentifier.from(testNotAnnotated);
         // WHEN
         Optional<String> idOpt = xrayTestMetadataReader.getId(testIdentifier);
         // THEN
@@ -179,7 +179,7 @@ class DefaultXrayTestInfoReaderTest {
     @Test
     void shouldReturnSummaryFromXrayTestAnnotation() {
         // GIVEN
-        TestIdentifier testIdentifier = TestIdentifier.from(XRAYTEST_ANNOTATED);
+        TestIdentifier testIdentifier = TestIdentifier.from(testWithXraytestAnnotation);
         // WHEN
         Optional<String> summaryOpt = xrayTestMetadataReader.getSummary(testIdentifier);
         // THEN
@@ -190,7 +190,7 @@ class DefaultXrayTestInfoReaderTest {
     @Test
     void shouldReturnOptionalEmptyFromXrayTestAnnotationWithEmptySummary() {
         // GIVEN
-        TestIdentifier testIdentifier = TestIdentifier.from(XRAYTEST_EMPTY_ANNOTATION);
+        TestIdentifier testIdentifier = TestIdentifier.from(testWithXraytestEmptyAnnotation);
         // WHEN
         Optional<String> summaryOpt = xrayTestMetadataReader.getSummary(testIdentifier);
         // THEN
@@ -201,7 +201,7 @@ class DefaultXrayTestInfoReaderTest {
     @Test
     void shouldReturnOptionalEmptySummaryWhenMethodNotAnnotated() {
         // GIVEN
-        TestIdentifier testIdentifier = TestIdentifier.from(NOT_ANNOTATED);
+        TestIdentifier testIdentifier = TestIdentifier.from(testNotAnnotated);
         // WHEN
         Optional<String> summaryOpt = xrayTestMetadataReader.getSummary(testIdentifier);
         // THEN
@@ -212,7 +212,7 @@ class DefaultXrayTestInfoReaderTest {
     @Test
     void shouldReturnDisplayNameWhenNotAnnotatedWithXrayTest() {
         // GIVEN
-        TestIdentifier testIdentifier = TestIdentifier.from(DISPLAY_NAME_ANNOTATED);
+        TestIdentifier testIdentifier = TestIdentifier.from(testWithDisplayNameAnnotation);
         // WHEN
         Optional<String> summaryOpt = xrayTestMetadataReader.getSummary(testIdentifier);
         // THEN
@@ -223,7 +223,7 @@ class DefaultXrayTestInfoReaderTest {
     @Test
     void shouldReturnDisplayNameFromXrayTestAnnotationWhenAlsoAnnotatedWithDisplayName() {
         // GIVEN
-        TestIdentifier testIdentifier = TestIdentifier.from(XRAYTEST_AND_DISPLAY_NAME_ANNOTATED);
+        TestIdentifier testIdentifier = TestIdentifier.from(testWithXraytestAndDisplayNameAnnotation);
         // WHEN
         Optional<String> summaryOpt = xrayTestMetadataReader.getSummary(testIdentifier);
         // THEN
@@ -234,7 +234,7 @@ class DefaultXrayTestInfoReaderTest {
     @Test
     void shouldReturnDefaultDisplayNameWhenAnnotatedWithDisplayNameGenerator() {
         // GIVEN
-        TestIdentifier testIdentifier = TestIdentifier.from(WITH_DISPLAY_NAME_GENERATOR);
+        TestIdentifier testIdentifier = TestIdentifier.from(testWithDisplayNameGenerator);
         // WHEN
         Optional<String> summaryOpt = xrayTestMetadataReader.getSummary(testIdentifier);
         // THEN
@@ -245,7 +245,7 @@ class DefaultXrayTestInfoReaderTest {
     @Test
     void shouldReturnDefaultDisplayNameWhenAnnotatedWithTestFactory() {
         // GIVEN
-        TestIdentifier testIdentifier = TestIdentifier.from(WITH_TEST_FACTORY);
+        TestIdentifier testIdentifier = TestIdentifier.from(testWithTestFactoryAnnotation);
         // WHEN
         Optional<String> summaryOpt = xrayTestMetadataReader.getSummary(testIdentifier);
         // THEN
@@ -256,7 +256,7 @@ class DefaultXrayTestInfoReaderTest {
     @Test
     void shouldReturnDescriptionFromXrayTestAnnotation() {
         // GIVEN
-        TestIdentifier testIdentifier = TestIdentifier.from(XRAYTEST_ANNOTATED);
+        TestIdentifier testIdentifier = TestIdentifier.from(testWithXraytestAnnotation);
         // WHEN
         Optional<String> descriptionOpt = xrayTestMetadataReader.getDescription(testIdentifier);
         // THEN
@@ -267,7 +267,7 @@ class DefaultXrayTestInfoReaderTest {
     @Test
     void shouldReturnOptionalEmptyFromXrayTestAnnotationWithEmptyDescription() {
         // GIVEN
-        TestIdentifier testIdentifier = TestIdentifier.from(XRAYTEST_EMPTY_ANNOTATION);
+        TestIdentifier testIdentifier = TestIdentifier.from(testWithXraytestEmptyAnnotation);
         // WHEN
         Optional<String> descriptionOpt = xrayTestMetadataReader.getDescription(testIdentifier);
         // THEN
@@ -278,7 +278,7 @@ class DefaultXrayTestInfoReaderTest {
     @Test
     void shouldReturnOptionalEmptyDescriptionWhenMethodNotAnnotated() {
         // GIVEN
-        TestIdentifier testIdentifier = TestIdentifier.from(NOT_ANNOTATED);
+        TestIdentifier testIdentifier = TestIdentifier.from(testNotAnnotated);
         // WHEN
         Optional<String> descriptionOpt = xrayTestMetadataReader.getDescription(testIdentifier);
         // THEN
@@ -289,7 +289,7 @@ class DefaultXrayTestInfoReaderTest {
     @Test
     void shouldReturnRequirementsFromRequirementsAnnotation() {
         // GIVEN
-        TestIdentifier testIdentifier = TestIdentifier.from(XRAYTEST_ANNOTATED);
+        TestIdentifier testIdentifier = TestIdentifier.from(testWithXraytestAnnotation);
         // WHEN
         List<String> requirements = xrayTestMetadataReader.getRequirements(testIdentifier);
         // THEN
@@ -300,7 +300,7 @@ class DefaultXrayTestInfoReaderTest {
     @Test
     void shouldReturnEmptyListFromRequirementsAnnotationWithEmptyArray() {
         // GIVEN
-        TestIdentifier testIdentifier = TestIdentifier.from(XRAYTEST_EMPTY_ANNOTATION);
+        TestIdentifier testIdentifier = TestIdentifier.from(testWithXraytestEmptyAnnotation);
         // WHEN
         List<String> requirements = xrayTestMetadataReader.getRequirements(testIdentifier);
         // THEN
@@ -311,7 +311,7 @@ class DefaultXrayTestInfoReaderTest {
     @Test
     void shouldReturnEmptyListOfRequirementsWhenMethodNotAnnotated() {
         // GIVEN
-        TestIdentifier testIdentifier = TestIdentifier.from(NOT_ANNOTATED);
+        TestIdentifier testIdentifier = TestIdentifier.from(testNotAnnotated);
         // WHEN
         List<String> requirements = xrayTestMetadataReader.getRequirements(testIdentifier);
         // THEN
