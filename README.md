@@ -62,7 +62,8 @@ If you want, you may configure certain aspects of this extension. The defaults s
 - `report_directory`: the directory where to generate the report, in relative or absolute format. Default is "target"
 - `add_timestamp_to_report_filename`: add a timestamp based suffix to the report. Default is "false".
 - `report_only_annotated_tests`: only include tests annotated with @XrayTest or @Requirement. Default is "false".
-- `reports_per_class`: generate JUnit XML reports per test class instead of a single report with all results; if true, `report_filename`, and `add_timestamp_to_report_filename` are ignored. Default is "false". 
+- `reports_per_class`: generate JUnit XML reports per test class instead of a single report with all results; if true, `report_filename`, and `add_timestamp_to_report_filename` are ignored. Default is "false".
+- `test_metadata_reader`: override the default logic responsible for reading meta-information about test methods.
 
 Example:
 
@@ -72,6 +73,7 @@ report_directory=reports
 add_timestamp_to_report_filename=true
 report_only_annotated_tests=false
 reports_per_class=false
+test_metadata_reader=com.example.CustomTestMetadataReader
 ```
 
 ## How to use
@@ -190,6 +192,74 @@ public class XrayEnabledTestExamples {
     }
 ```
 
+### Customizing how test metadata is read
+
+When generating the report, it's allowed to customize the way the test method information is read.
+By default, test information such as id, key, summary, description and requirements are read directly from @XrayTest and @Requirements annotations.
+This behavior can be overridden by the user when he wants to change the way these meta-information are generated, or when he wants to use their own annotations to describe the tests.
+
+To do this, you need to create a public class with a no-argument constructor that implements the `app.getxray.xray.junit.customjunitxml.XrayTestMetadataReader` interface (or extend `app.getxray.xray.junit.customjunitxml.DefaultXrayTestMetadataReader` class).
+Then must add `test_metadata_reader` entry with the class name to the `xray-junit-extensions.properties` file.
+
+
+#### Example: Custom test metadata reader to read Jira key from custom @JiraKey annotation
+
+_JiraKey.java_
+```java
+package com.example;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+@Retention(RetentionPolicy.RUNTIME)
+public @interface JiraKey {
+    String value();
+}
+```
+
+_CustomTestMetadataReader.java_
+```java
+package com.example;
+
+import app.getxray.xray.junit.customjunitxml.DefaultXrayTestMetadataReader;
+import org.junit.platform.launcher.TestIdentifier;
+
+import java.util.Optional;
+
+public class CustomTestMetadataReader extends DefaultXrayTestMetadataReader {
+
+    @Override
+    public Optional<String> getKey(TestIdentifier testIdentifier) {
+        return getTestMethodAnnotation(testIdentifier, JiraKey.class)
+                .map(JiraKey::value)
+                .filter(s -> !s.isEmpty());
+    }
+}
+```
+
+_xray-junit-extensions.properties_
+```
+test_metadata_reader=com.example.CustomTestMetadataReader
+```
+
+_SimpleTest.java_
+```java
+package com.example;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+class SimpleTest {
+
+    @Test
+    @JiraKey("CALC-123")
+    @DisplayName("simple test")
+    void simpleTest() {
+        // ...
+    }
+}
+```
+
 ## Other features and limitations
 
 ### Name of Tests
@@ -199,6 +269,9 @@ The summary of the Test issue will be set based on these rules (the first that a
 * based on the summary attribute of @XrayTest annotation (e.g. `@XrayTest(summary = "xxx")`); 
 * based on the `@DisplayName` annotation, or the display name of dynamically created tests from a TestFactory;
 * based on the test's method name.
+
+> [!TIP]
+> This behavior can be changed by defining a custom test metadata reader.
 
 ### Parameterized and repeated tests
 

@@ -10,9 +10,6 @@
 
 package app.getxray.xray.junit.customjunitxml;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.DisplayNameGeneration;
-import org.junit.jupiter.api.TestFactory;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
 import org.junit.platform.commons.support.AnnotationSupport;
@@ -96,14 +93,19 @@ class XmlReportWriter {
 	// re-add separator characters.
 	private static final Pattern CDATA_SPLIT_PATTERN = Pattern.compile("(?<=]])(?=>)");
 
-	private final XmlReportData reportData;
-	private static final Logger logger = LoggerFactory.getLogger(EnhancedLegacyXmlReportGeneratingListener.class);
-	private boolean reportOnlyAnnotatedTests = false;
+    private static final Logger logger = LoggerFactory.getLogger(EnhancedLegacyXmlReportGeneratingListener.class);
 
-	XmlReportWriter(XmlReportData reportData, boolean reportOnlyAnnotatedTests) {
-		this.reportData = reportData;
+    private final XmlReportData reportData;
+	private final boolean reportOnlyAnnotatedTests;
+	private final XrayTestMetadataReader xrayTestMetadataReader;
+
+    XmlReportWriter(XmlReportData reportData,
+                    boolean reportOnlyAnnotatedTests,
+                    XrayTestMetadataReader xrayTestMetadataReader) {
+        this.reportData = reportData;
 		this.reportOnlyAnnotatedTests = reportOnlyAnnotatedTests;
-	}
+        this.xrayTestMetadataReader = xrayTestMetadataReader;
+    }
 
 	void writeXmlReport(TestIdentifier rootDescriptor, Writer out) throws XMLStreamException {
 		TestPlan testPlan = this.reportData.getTestPlan();
@@ -234,7 +236,6 @@ class XmlReportWriter {
 
 		final Optional<TestSource> testSource = testIdentifier.getSource();
 		final Optional<Method> testMethod = testSource.flatMap(this::getTestMethod);
-		final Class testClass = ((MethodSource)testSource.get()).getJavaClass();
 		Optional<XrayTest> xrayTest = AnnotationSupport.findAnnotation(testMethod, XrayTest.class);
 		Optional<Requirement> requirement = AnnotationSupport.findAnnotation(testMethod, Requirement.class);
 		if (reportOnlyAnnotatedTests && (!requirement.isPresent() && !xrayTest.isPresent())) {
@@ -272,49 +273,28 @@ class XmlReportWriter {
 			newLine(writer);
 		}
 
-		// final Optional<Class<?>> testClass = testSource.flatMap(this::getTestClass);
-
-		if (requirement.isPresent()) {
-			String[] requirements = requirement.get().value();
+		List<String> requirements = xrayTestMetadataReader.getRequirements(testIdentifier);
+		if (!requirements.isEmpty()) {
 			addProperty(writer, "requirements", String.join(",", requirements));
 		}
 
-		String test_key = null;
-		String test_id = null;
-		String test_summary = null;
-		String test_description = null;
-		if (xrayTest.isPresent()) {
-			test_key = xrayTest.get().key();
-			if ((test_key != null) && (!test_key.isEmpty())) {
-				addProperty(writer, "test_key", test_key);
-			}
+        Optional<String> testKeyOpt = xrayTestMetadataReader.getKey(testIdentifier);
+        if (testKeyOpt.isPresent()) {
+            addProperty(writer, "test_key", testKeyOpt.get());
+        }
+        Optional<String> testIdOpt = xrayTestMetadataReader.getId(testIdentifier);
+        if (testIdOpt.isPresent()) {
+            addProperty(writer, "test_id", testIdOpt.get());
+        }
 
-			test_id = xrayTest.get().id();
-			if ((test_id != null) && (!test_id.isEmpty())) {
-				addProperty(writer, "test_id", test_id);
-			}
+        Optional<String> testDescriptionOpt = xrayTestMetadataReader.getDescription(testIdentifier);
+        if (testDescriptionOpt.isPresent()) {
+            addPropertyWithInnerContent(writer, "test_description", testDescriptionOpt.get());
+        }
 
-			test_summary = xrayTest.get().summary();
-			test_description = xrayTest.get().description();
-			if ((test_description != null) && (!test_description.isEmpty())) {
-				addPropertyWithInnerContent(writer, "test_description", test_description);
-			}
-		}
-
-		Optional<TestFactory> dynamicTest = AnnotationSupport.findAnnotation(testMethod, TestFactory.class);
-		Optional<DisplayName> displayName = AnnotationSupport.findAnnotation(testMethod, DisplayName.class);
-		Optional<DisplayNameGeneration> displayNameGenerator = AnnotationSupport.findAnnotation(testClass, DisplayNameGeneration.class);
-
-		// this logic should be improved/simplified; the displayNameGererator logic isnt handling all cases, inclusing if it was set globally
-		if ( ((test_summary == null) || (test_summary.isEmpty())) && (displayName.isPresent()) ) {
-			test_summary = displayName.get().value();
-		}
-		if ( ((test_summary == null) || (test_summary.isEmpty())) && (dynamicTest.isPresent() || displayNameGenerator.isPresent()) ) {
-			test_summary = testIdentifier.getDisplayName();
-		}
-
-		if ((test_summary != null) && (!test_summary.isEmpty())) {
-			addProperty(writer, "test_summary", test_summary);
+        Optional<String> testSummaryOpt = xrayTestMetadataReader.getSummary(testIdentifier);
+		if (testSummaryOpt.isPresent()) {
+			addProperty(writer, "test_summary", testSummaryOpt.get());
 		}
 
 		List<String> tags = testIdentifier.getTags().stream().map(TestTag::getName).map(String::trim)

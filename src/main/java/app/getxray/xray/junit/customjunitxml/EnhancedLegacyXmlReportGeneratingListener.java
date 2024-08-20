@@ -21,9 +21,6 @@ import org.junit.platform.launcher.TestPlan;
 
 import javax.xml.stream.XMLStreamException;
 
-import static org.junit.jupiter.api.DynamicTest.stream;
-
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -65,6 +62,7 @@ public class EnhancedLegacyXmlReportGeneratingListener implements TestExecutionL
 	boolean addTimestampToReportFilename = false;
 	boolean reportOnlyAnnotatedTests = false;
 	boolean reportsPerClass = false;
+	XrayTestMetadataReader testInfoReader = new DefaultXrayTestMetadataReader();
 
 	private XmlReportData reportData;
 
@@ -95,6 +93,9 @@ public class EnhancedLegacyXmlReportGeneratingListener implements TestExecutionL
 				this.addTimestampToReportFilename = "true".equals(properties.getProperty("add_timestamp_to_report_filename"));
 				this.reportOnlyAnnotatedTests = "true".equals(properties.getProperty("report_only_annotated_tests", "false"));
 				this.reportsPerClass = "true".equals(properties.getProperty("reports_per_class", "false"));
+				if (!properties.getProperty("test_metadata_reader").isEmpty()) {
+					this.testInfoReader = (XrayTestMetadataReader) Class.forName(properties.getProperty("test_metadata_reader")).getConstructor().newInstance();
+				}
 			} else {
 				if (reportsDir == null) {
 					this.reportsDir = FileSystems.getDefault().getPath(DEFAULT_REPORTS_DIR);
@@ -183,7 +184,7 @@ public class EnhancedLegacyXmlReportGeneratingListener implements TestExecutionL
 		xmlFile = this.reportsDir.resolve(fileName);
 
 		try (Writer fileWriter = Files.newBufferedWriter(xmlFile)) {
-			new XmlReportWriter(this.reportData, this.reportOnlyAnnotatedTests).writeXmlReport(testIdentifier, fileWriter);
+			new XmlReportWriter(this.reportData, this.reportOnlyAnnotatedTests, this.testInfoReader).writeXmlReport(testIdentifier, fileWriter);
 		} catch (XMLStreamException | IOException e) {
 			printException("Could not write XML report: " + xmlFile, e);
 			logger.error(e, () -> "Could not write XML report: " + xmlFile);
