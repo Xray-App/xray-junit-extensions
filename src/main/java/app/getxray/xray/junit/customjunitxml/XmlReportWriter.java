@@ -210,7 +210,7 @@ class XmlReportWriter {
 			final Class<?> aClass = Class.forName(source.getClassName());
 			return Stream.of(aClass.getDeclaredMethods()).filter(method -> MethodSource.from(method).equals(source))
 					.findAny();
-		} catch (ClassNotFoundException e) {
+		} catch (ClassNotFoundException | NoClassDefFoundError e) {
 			logger.error(e, () -> "Could not get test method from method source " + source);
 		}
 		return Optional.empty();
