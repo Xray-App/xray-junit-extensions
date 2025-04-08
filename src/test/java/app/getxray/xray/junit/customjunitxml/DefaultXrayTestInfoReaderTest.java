@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -63,50 +64,55 @@ class DefaultXrayTestInfoReaderTest {
                     public Set<String> keySet() {
                         return Collections.emptySet();
                     }
-                }
+                }, null
         );
+
+        Supplier<List<Class<?>>> emptySupplier = () -> Collections.emptyList();
+
+        // create a supplier with just one class
+        Supplier<List<Class<?>>> oneClassSupplier = () -> Collections.singletonList(MockedTestClass.class);
 
         testWithXraytestAnnotation = new TestMethodTestDescriptor(
                 UniqueId.forEngine("foo"),
                 MockedTestClass.class,
                 MockedTestClass.class.getMethod("annotatedWithValues"),
-                jupiterConfiguration
+                emptySupplier, jupiterConfiguration
         );
         testWithXraytestEmptyAnnotation = new TestMethodTestDescriptor(
                 UniqueId.forEngine("foo"),
                 MockedTestClass.class,
                 MockedTestClass.class.getMethod("annotatedWithEmptyValues"),
-                jupiterConfiguration
+                emptySupplier, jupiterConfiguration
         );
         testNotAnnotated = new TestMethodTestDescriptor(
                 UniqueId.forEngine("foo"),
                 MockedTestClass.class,
                 MockedTestClass.class.getMethod("notAnnotatedTest"),
-                jupiterConfiguration
+                emptySupplier, jupiterConfiguration
         );
         testWithDisplayNameAnnotation = new TestMethodTestDescriptor(
                 UniqueId.forEngine("foo"),
                 MockedTestClass.class,
                 MockedTestClass.class.getMethod("annotatedWithDisplayName"),
-                jupiterConfiguration
+                oneClassSupplier, jupiterConfiguration
         );
         testWithXraytestAndDisplayNameAnnotation = new TestMethodTestDescriptor(
                 UniqueId.forEngine("foo"),
                 MockedTestClass.class,
                 MockedTestClass.class.getMethod("annotatedWithXrayTestAndDisplayName"),
-                jupiterConfiguration
+                oneClassSupplier, jupiterConfiguration
         );
         testWithDisplayNameGenerator = new TestMethodTestDescriptor(
                 UniqueId.forEngine("foo"),
                 MockedTestWithDisplayNameGeneratorClass.class,
                 MockedTestWithDisplayNameGeneratorClass.class.getMethod("withDisplayNameGenerator"),
-                jupiterConfiguration
+                oneClassSupplier, jupiterConfiguration
         );
         testWithTestFactoryAnnotation = new TestMethodTestDescriptor(
                 UniqueId.forEngine("foo"),
                 MockedTestClass.class,
                 MockedTestClass.class.getMethod("withTestFactory"),
-                jupiterConfiguration
+                emptySupplier, jupiterConfiguration
         );
     }
 

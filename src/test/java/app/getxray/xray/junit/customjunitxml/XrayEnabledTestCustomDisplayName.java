@@ -23,7 +23,8 @@ public class XrayEnabledTestCustomDisplayName {
     
         @Override
         public String generateDisplayNameForNestedClass(Class<?> nestedClass) {
-            return replaceCamelCase(replaceUndercoreBySpace(super.generateDisplayNameForNestedClass(nestedClass)));
+            // return replaceCamelCase(replaceUndercoreBySpace(super.generateDisplayNameForNestedClass(nestedClass)));
+            return replaceCamelCase(replaceUndercoreBySpace(super.generateDisplayNameForNestedClass(null, nestedClass)));
         }
         
         @Override
