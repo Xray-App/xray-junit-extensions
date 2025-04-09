@@ -4,16 +4,19 @@ package app.getxray.xray.junit.customjunitxml;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayNameGeneration;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.lang.reflect.Method;
 import java.util.List;
 
 import org.junit.jupiter.api.DisplayNameGenerator.Standard;
 
-@DisplayNameGeneration(XrayEnabledTestCustomDisplayName.CustomDisplayNameGenerator.class)
-public class XrayEnabledTestCustomDisplayName {
+@DisplayNameGeneration(XrayEnabledCustomDisplayNameTest.CustomDisplayNameGenerator.class)
+class XrayEnabledCustomDisplayNameTest {
 
     @Test
-    public void legacyTest() {
+    void legacyTest() {
+        assertTrue(true);
     }
 
     public static class CustomDisplayNameGenerator extends Standard {

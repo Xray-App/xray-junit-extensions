@@ -70,7 +70,7 @@ import org.xml.sax.SAXException;
 public class EnhancedLegacyXmlTest {
 
     private static final Class TEST_EXAMPLES_CLASS = XrayEnabledTestExamples.class;
-    private static final Class CUSTOM_DISPLAYNAME_CLASS = XrayEnabledTestCustomDisplayName.class;
+    private static final Class CUSTOM_DISPLAYNAME_CLASS = XrayEnabledCustomDisplayNameTest.class;
     private static final Class BASIC_CLASS = BasicTestExample.class;
     private static final Class SIMPLE_CLASS = SimpleTestExample.class;
 
