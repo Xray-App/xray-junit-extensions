@@ -4,14 +4,19 @@ package app.getxray.xray.junit.customjunitxml;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayNameGeneration;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.lang.reflect.Method;
+import java.util.List;
+
 import org.junit.jupiter.api.DisplayNameGenerator.Standard;
 
-@DisplayNameGeneration(XrayEnabledTestCustomDisplayName.CustomDisplayNameGenerator.class)
-public class XrayEnabledTestCustomDisplayName {
+@DisplayNameGeneration(XrayEnabledCustomDisplayNameTest.CustomDisplayNameGenerator.class)
+class XrayEnabledCustomDisplayNameTest {
 
     @Test
-    public void legacyTest() {
+    void legacyTest() {
+        assertTrue(true);
     }
 
     public static class CustomDisplayNameGenerator extends Standard {
@@ -22,12 +27,12 @@ public class XrayEnabledTestCustomDisplayName {
         }
     
         @Override
-        public String generateDisplayNameForNestedClass(Class<?> nestedClass) {
-            return replaceCamelCase(replaceUndercoreBySpace(super.generateDisplayNameForNestedClass(nestedClass)));
+        public String generateDisplayNameForNestedClass(List<Class<?>> enclosingInstanceTypes, Class<?> nestedClass) {
+            return replaceCamelCase(replaceUndercoreBySpace(super.generateDisplayNameForNestedClass(null, nestedClass)));
         }
         
         @Override
-        public String generateDisplayNameForMethod(Class<?> testClass, Method testMethod) {
+        public String generateDisplayNameForMethod(List<Class<?>> enclosingInstanceTypes, Class<?> testClass, Method testMethod) {
             return this.replaceCamelCase(replaceUndercoreBySpace(testMethod.getName())) + " (custom_name)";
         }
     
