@@ -272,7 +272,7 @@ class EnhancedLegacyXmlTest {
     }
 
     @Test
-    public void withReportAnnotatedTestsDontReportNonAnnotated() throws Exception {
+    void withReportAnnotatedTestsDontReportNonAnnotated() throws Exception {
         String testMethodName = "legacyTest";
         String customProperties = "#report_filename=custom-report-junit\n#report_directory=\n# add_timestamp_to_report_filename=true\nreport_only_annotated_tests=true\n";
         Path customPropertiesFile = Files.createTempFile("xray-junit-extensions", ".properties");
@@ -713,7 +713,7 @@ class EnhancedLegacyXmlTest {
 
  
     @Test
-    public void shouldCreateReportEntryForEvidence() throws Exception {
+    void shouldCreateReportEntryForEvidence() throws Exception {
         String testMethodName = "testWithTestRunEvidence";
         LauncherDiscoveryRequest discoveryRequest = request()
                 .selectors(selectMethod(TEST_EXAMPLES_CLASS, testMethodName, "app.getxray.xray.junit.customjunitxml.XrayTestReporter"))
