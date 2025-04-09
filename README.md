@@ -49,7 +49,7 @@ Add the following dependency to your pom.xml:
         <dependency>
           <groupId>app.getxray</groupId>
           <artifactId>xray-junit-extensions</artifactId>
-          <version>0.9.0</version>
+          <version>0.10.0</version>
           <scope>test</scope>
         </dependency>
 ```
