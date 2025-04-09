@@ -69,9 +69,6 @@ class DefaultXrayTestInfoReaderTest {
 
         Supplier<List<Class<?>>> emptySupplier = () -> Collections.emptyList();
 
-        // create a supplier with just one class
-        Supplier<List<Class<?>>> oneClassSupplier = () -> Collections.singletonList(MockedTestClass.class);
-
         testWithXraytestAnnotation = new TestMethodTestDescriptor(
                 UniqueId.forEngine("foo"),
                 MockedTestClass.class,
@@ -94,19 +91,19 @@ class DefaultXrayTestInfoReaderTest {
                 UniqueId.forEngine("foo"),
                 MockedTestClass.class,
                 MockedTestClass.class.getMethod("annotatedWithDisplayName"),
-                oneClassSupplier, jupiterConfiguration
+                emptySupplier, jupiterConfiguration
         );
         testWithXraytestAndDisplayNameAnnotation = new TestMethodTestDescriptor(
                 UniqueId.forEngine("foo"),
                 MockedTestClass.class,
                 MockedTestClass.class.getMethod("annotatedWithXrayTestAndDisplayName"),
-                oneClassSupplier, jupiterConfiguration
+                emptySupplier, jupiterConfiguration
         );
         testWithDisplayNameGenerator = new TestMethodTestDescriptor(
                 UniqueId.forEngine("foo"),
                 MockedTestWithDisplayNameGeneratorClass.class,
                 MockedTestWithDisplayNameGeneratorClass.class.getMethod("withDisplayNameGenerator"),
-                oneClassSupplier, jupiterConfiguration
+                emptySupplier, jupiterConfiguration
         );
         testWithTestFactoryAnnotation = new TestMethodTestDescriptor(
                 UniqueId.forEngine("foo"),

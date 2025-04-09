@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayNameGeneration;
 
 import java.lang.reflect.Method;
+import java.util.List;
+
 import org.junit.jupiter.api.DisplayNameGenerator.Standard;
 
 @DisplayNameGeneration(XrayEnabledTestCustomDisplayName.CustomDisplayNameGenerator.class)
@@ -22,13 +24,12 @@ public class XrayEnabledTestCustomDisplayName {
         }
     
         @Override
-        public String generateDisplayNameForNestedClass(Class<?> nestedClass) {
-            // return replaceCamelCase(replaceUndercoreBySpace(super.generateDisplayNameForNestedClass(nestedClass)));
+        public String generateDisplayNameForNestedClass(List<Class<?>> enclosingInstanceTypes, Class<?> nestedClass) {
             return replaceCamelCase(replaceUndercoreBySpace(super.generateDisplayNameForNestedClass(null, nestedClass)));
         }
         
         @Override
-        public String generateDisplayNameForMethod(Class<?> testClass, Method testMethod) {
+        public String generateDisplayNameForMethod(List<Class<?>> enclosingInstanceTypes, Class<?> testClass, Method testMethod) {
             return this.replaceCamelCase(replaceUndercoreBySpace(testMethod.getName())) + " (custom_name)";
         }
     
