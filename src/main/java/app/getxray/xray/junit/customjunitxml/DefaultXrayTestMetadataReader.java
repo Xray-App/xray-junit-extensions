@@ -17,6 +17,7 @@ import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.platform.commons.support.AnnotationSupport;
 import org.junit.platform.engine.support.descriptor.MethodSource;
+import org.junit.platform.engine.support.descriptor.UriSource;
 import org.junit.platform.launcher.TestIdentifier;
 
 import java.lang.annotation.Annotation;
@@ -29,16 +30,36 @@ public class DefaultXrayTestMetadataReader implements XrayTestMetadataReader {
 
     @Override
     public Optional<String> getId(TestIdentifier testIdentifier) {
-        return getTestMethodAnnotation(testIdentifier, XrayTest.class)
+        Optional<String> id = getTestMethodAnnotation(testIdentifier, XrayTest.class)
                 .map(XrayTest::id)
                 .filter(s -> !s.isEmpty());
+        if (id.isPresent()) {
+            return id;
+        }
+
+        Optional<String> uriSourceId = readQueryValue(testIdentifier, XrayURI.QUERY_ID);
+        if (uriSourceId.isPresent()) {
+            return uriSourceId;
+        }
+
+        return Optional.empty();
     }
 
     @Override
     public Optional<String> getKey(TestIdentifier testIdentifier) {
-        return getTestMethodAnnotation(testIdentifier, XrayTest.class)
+        Optional<String> key = getTestMethodAnnotation(testIdentifier, XrayTest.class)
                 .map(XrayTest::key)
                 .filter(s -> !s.isEmpty());
+        if (key.isPresent()) {
+            return key;
+        }
+
+        Optional<String> uriSourceKey = readQueryValue(testIdentifier, XrayURI.QUERY_KEY);
+        if (uriSourceKey.isPresent()) {
+            return uriSourceKey;
+        }
+
+        return Optional.empty();
     }
 
     @Override
@@ -62,14 +83,29 @@ public class DefaultXrayTestMetadataReader implements XrayTestMetadataReader {
             return Optional.of(testIdentifier.getDisplayName());
         }
 
+        Optional<String> uriSourceSummary = readQueryValue(testIdentifier, XrayURI.QUERY_SUMMARY);
+        if (uriSourceSummary.isPresent()) {
+            return uriSourceSummary;
+        }
+
         return Optional.empty();
     }
 
     @Override
     public Optional<String> getDescription(TestIdentifier testIdentifier) {
-        return getTestMethodAnnotation(testIdentifier, XrayTest.class)
+        Optional<String> description = getTestMethodAnnotation(testIdentifier, XrayTest.class)
                 .map(XrayTest::description)
                 .filter(s -> !s.isEmpty());
+        if (description.isPresent()) {
+            return description;
+        }
+
+        Optional<String> uriSourceDescription = readQueryValue(testIdentifier, XrayURI.QUERY_DESCRIPTION);
+        if (uriSourceDescription.isPresent()) {
+            return uriSourceDescription;
+        }
+
+        return Optional.empty();
     }
 
     @Override
@@ -94,5 +130,13 @@ public class DefaultXrayTestMetadataReader implements XrayTestMetadataReader {
                 .map(MethodSource.class::cast)
                 .map(MethodSource::getJavaClass)
                 .flatMap(a -> AnnotationSupport.findAnnotation(a, aClass));
+    }
+
+    private Optional<String> readQueryValue(TestIdentifier testIdentifier, String key) {
+        return testIdentifier.getSource()
+                .filter(UriSource.class::isInstance)
+                .map(UriSource.class::cast)
+                .map(UriSource::getUri)
+                .flatMap(x -> XrayURI.readQueryValue(x, key));
     }
 }
