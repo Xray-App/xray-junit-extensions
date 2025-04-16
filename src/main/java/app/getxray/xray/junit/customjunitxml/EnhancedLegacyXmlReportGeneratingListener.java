@@ -53,7 +53,6 @@ public class EnhancedLegacyXmlReportGeneratingListener implements TestExecutionL
 	private static final String DEFAULT_REPORTS_DIR = "./target";
 	private static final Logger logger = LoggerFactory.getLogger(EnhancedLegacyXmlReportGeneratingListener.class);
 
-	private Path propertiesFile;
 	private Path reportsDir;
 	private final PrintWriter out;
 	private final Clock clock;
@@ -73,7 +72,7 @@ public class EnhancedLegacyXmlReportGeneratingListener implements TestExecutionL
 	// main construtor; used directly by tests
 	public EnhancedLegacyXmlReportGeneratingListener(Path reportsDir, Path propertiesFile, PrintWriter out, Clock clock) {
 		this.reportsDir = reportsDir;
-		this.propertiesFile = propertiesFile;
+		// this.propertiesFile = propertiesFile;
 		this.out = out;
 		this.clock = clock;
 

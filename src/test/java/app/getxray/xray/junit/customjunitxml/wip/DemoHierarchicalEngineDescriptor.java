@@ -16,7 +16,6 @@ import static org.junit.platform.engine.support.hierarchical.Node.SkipResult.ski
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.support.descriptor.EngineDescriptor;
 import org.junit.platform.engine.support.hierarchical.Node;
-import org.junit.platform.engine.support.hierarchical.Node.SkipResult;
 
 /**
  * @since 1.0

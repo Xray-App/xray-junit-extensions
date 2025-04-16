@@ -567,7 +567,7 @@ class EnhancedLegacyXmlTest {
         ArgumentCaptor<TestPlan> testPlanArgumentCaptor = ArgumentCaptor.forClass(TestPlan.class);
 		InOrder inOrder = inOrder(listener);
 		inOrder.verify(listener).testPlanExecutionStarted(testPlanArgumentCaptor.capture());
-		TestPlan testPlan = testPlanArgumentCaptor.getValue();
+		// TestPlan testPlan = testPlanArgumentCaptor.getValue();
 		//TestIdentifier testIdentifier = testPlan.getTestIdentifier("test.getUniqueId().toString()");
 
         ArgumentCaptor<ReportEntry> reportEntryArgumentCaptor = ArgumentCaptor.forClass(ReportEntry.class);
