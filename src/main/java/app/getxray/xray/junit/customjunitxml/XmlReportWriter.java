@@ -297,8 +297,7 @@ class XmlReportWriter {
 			addProperty(writer, "test_summary", testSummaryOpt.get());
 		}
 
-		List<String> tags = testIdentifier.getTags().stream().map(TestTag::getName).map(String::trim)
-				.collect(Collectors.toList());
+		List<String> tags = xrayTestMetadataReader.getTags(testIdentifier);
 		if (!tags.isEmpty()) {
 			addProperty(writer, "tags", String.join(",", tags));
 		}

@@ -47,4 +47,9 @@ public interface XrayTestMetadataReader {
      */
     List<String> getRequirements(TestIdentifier testIdentifier);
 
+    /**
+     * @param testIdentifier test identifier
+     * @return Unmodifiable list of tags
+     */
+    List<String> getTags(TestIdentifier testIdentifier);
 }
