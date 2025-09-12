@@ -20,7 +20,6 @@ import org.junit.platform.engine.reporting.ReportEntry;
 import org.junit.platform.engine.support.descriptor.MethodSource;
 import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
-import org.junit.platform.reporting.legacy.LegacyReportingUtils;
 
 import app.getxray.xray.junit.customjunitxml.XmlReportWriter.AggregatedTestResult.Type;
 import app.getxray.xray.junit.customjunitxml.annotations.Requirement;
@@ -243,8 +242,8 @@ class XmlReportWriter {
 		}
 
 		writer.writeStartElement("testcase");
-		writeAttributeSafely(writer, "name", getName(testIdentifier));
-		writeAttributeSafely(writer, "classname", getClassName(testIdentifier));
+		writeAttributeSafely(writer, "name", xrayTestMetadataReader.getName(testIdentifier));
+		writeAttributeSafely(writer, "classname", xrayTestMetadataReader.getClassName(testIdentifier, this.reportData.getTestPlan()));
 		writeAttributeSafely(writer, "time", getTime(testIdentifier, numberFormat));
 		DateTimeFormatter dateFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.from(ZoneOffset.UTC));
 		writeAttributeSafely(writer, "started-at", getStartedAt(testIdentifier, dateFormatter));
@@ -386,20 +385,6 @@ class XmlReportWriter {
 		writer.writeCharacters(content);
 		writer.writeEndElement();
 		newLine(writer);
-	}
-
-	private String getName(TestIdentifier testIdentifier) {
-		String legacyName = testIdentifier.getLegacyReportingName();
-		int pos = legacyName.indexOf('(');
-		if (pos > 0) {
-			return legacyName.substring(0, pos);
-		} else {
-			return legacyName;
-		}
-	}
-
-	private String getClassName(TestIdentifier testIdentifier) {
-		return LegacyReportingUtils.getClassName(this.reportData.getTestPlan(), testIdentifier);
 	}
 
 	private void writeSkippedOrErrorOrFailureElement(TestIdentifier testIdentifier, AggregatedTestResult testResult,

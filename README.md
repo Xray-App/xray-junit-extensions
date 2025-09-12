@@ -201,8 +201,39 @@ This behavior can be overridden by the user when he wants to change the way thes
 To do this, you need to create a public class with a no-argument constructor that implements the `app.getxray.xray.junit.customjunitxml.XrayTestMetadataReader` interface (or extend `app.getxray.xray.junit.customjunitxml.DefaultXrayTestMetadataReader` class).
 Then must add `test_metadata_reader` entry with the class name to the `xray-junit-extensions.properties` file.
 
+### Advanced: Customizing Test Metadata Extraction
+
+The `xray-junit-extensions` provides a flexible mechanism for reading test metadata, such as test keys, summaries, and requirements. This is achieved through the `XrayTestMetadataReader` interface, which abstracts the process of extracting this information.
+This is a powerful feature that enables you to seamlessly integrate your existing testing infrastructure with Xray, without having to refactor your test suite to use the provided annotations.
+
+To override the default behavior, you need to:
+1. create a public class with a no-argument constructor that implements the `app.getxray.xray.junit.customjunitxml.XrayTestMetadataReader` interface
+2. add the `test_metadata_reader` entry to the `xray-junit-extensions.properties` file with the fully qualified name of your custom class
+
+#### The XrayTestMetadataReader interface
+
+The `XrayTestMetadataReader` interface defines a set of methods for extracting specific pieces of metadata from a test. By implementing this interface, you can define your own logic for obtaining test metadata from any source, such as custom annotations, external files, or even a database.
+
+| Method | Description | Default Behavior | Example |
+| --- | --- | --- | --- |
+| `getName` | Extracts the test case name from the provided `TestIdentifier`. | By default, it uses JUnit's legacy reporting name, which is a format suitable for legacy reporting infrastructure (e.g., `testMethod(params)`). The default implementation parses this string to return only the method name (e.g., `testMethod`). | Given a method `void myTestMethod()`, returns `"myTestMethod"`. |
+| `getClassName` | Retrieves the fully qualified class name for the test. | Delegates to JUnit Platform's reporting utilities to obtain the class name. | Given a class `com.example.MyTest`, returns `"com.example.MyTest"`. |
+| `getId` | Returns the test ID, if available. | Reads the `id` attribute from the `@XrayTest` annotation. | `@XrayTest(id = "XMP-123")` |
+| `getKey` | Returns the test key, if available. | Reads the `key` attribute from the `@XrayTest` annotation. | `@XrayTest(key = "CALC-123")` |
+| `getSummary` | Returns the test summary, if available. | Reads the `summary` attribute from the `@XrayTest` annotation, falling back to `@DisplayName` or the test method name. | `@XrayTest(summary = "My summary")` |
+| `getDescription`| Returns the test description, if available. | Reads the `description` attribute from the `@XrayTest` annotation. | `@XrayTest(description = "...")` |
+| `getRequirements`| Returns a list of requirements associated with the test. | Reads the values from the `@Requirement` annotation. | `@Requirement("REQ-456")` |
+
+#### The DefaultXrayTestMetadataReader class
+
+The `DefaultXrayTestMetadataReader` class is the default implementation of the `XrayTestMetadataReader` interface. It reads metadata from the `@XrayTest` and `@Requirement` annotations, as described in the table above.
+When implementing a custom metadata reader, you can extend the `DefaultXrayTestMetadataReader` class to reuse some of its default behavior. This is particularly useful when you only need to override the logic for a specific piece of metadata.
 
 #### Example: Custom test metadata reader to read Jira key from custom @JiraKey annotation
+
+Let's say you have a custom annotation, `@JiraKey`, that you use to specify the Jira issue key for a test. You can create a custom metadata reader to extract the test key from this annotation.
+
+First, define the `@JiraKey` annotation:
 
 _JiraKey.java_
 ```java
@@ -216,6 +247,7 @@ public @interface JiraKey {
     String value();
 }
 ```
+Next, create a custom metadata reader that extends `DefaultXrayTestMetadataReader` and overrides the `getKey` method:
 
 _CustomTestMetadataReader.java_
 ```java
@@ -237,10 +269,14 @@ public class CustomTestMetadataReader extends DefaultXrayTestMetadataReader {
 }
 ```
 
+Then, configure the custom metadata reader in the `xray-junit-extensions.properties` file:
+
 _xray-junit-extensions.properties_
 ```
 test_metadata_reader=com.example.CustomTestMetadataReader
 ```
+
+Finally, use the `@JiraKey` annotation in your test:
 
 _SimpleTest.java_
 ```java

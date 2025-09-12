@@ -8,7 +8,11 @@ import java.nio.file.FileSystems;
 import java.util.Arrays;
 import java.util.Collection;
 
+import app.getxray.xray.junit.customjunitxml.annotations.Requirement;
+import app.getxray.xray.junit.customjunitxml.annotations.XrayTest;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -16,10 +20,6 @@ import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import app.getxray.xray.junit.customjunitxml.annotations.Requirement;
-import app.getxray.xray.junit.customjunitxml.annotations.XrayTest;
-
-import org.junit.jupiter.api.DynamicTest;
 
 @ExtendWith(XrayTestReporterParameterResolver.class)
 public class XrayEnabledTestExamples {
@@ -135,12 +135,12 @@ public class XrayEnabledTestExamples {
 
     @DisplayName("custom name")
     @RepeatedTest(3)
-    void repeatedTestAnnotatedWithDisplayName() {
+    public void repeatedTestAnnotatedWithDisplayName() {
         fail("with DisplayName");
     }
 
     @RepeatedTest(3)
-    void repeatedTestAnnotatedWithoutDisplayName() {
+    public void repeatedTestAnnotatedWithoutDisplayName() {
         fail("without DisplayName");
     }
 
@@ -149,5 +149,13 @@ public class XrayEnabledTestExamples {
         return Arrays.asList(
             dynamicTest("1st dynamic test", () -> assertTrue(true))
         );
+    }
+
+    @Nested
+    class NestedClass {
+        @Test
+        void nestedTest() {
+            //
+        }
     }
 }
