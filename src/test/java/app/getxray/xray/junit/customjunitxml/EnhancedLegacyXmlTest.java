@@ -1,5 +1,4 @@
 /*
-/*
  * Copyright 2021-2021 the original author or authors.
  *
  * All rights reserved. This program and the accompanying materials are
@@ -94,12 +93,16 @@ class EnhancedLegacyXmlTest {
         assertThat(testsuite.children("testcase")).hasSize(2);
         assertThat(testsuite.children("testcase").matchAttr("name", "someBasicTest")).isNotEmpty();
         assertThat(testsuite.children("testcase").matchAttr("name", "anotherBasicTest")).isNotEmpty();
+        assertThat(testsuite.children("testcase").filter(context -> BASIC_CLASS.getName().equals(context.element().getAttribute("classname"))))
+                .hasSize(2);
 
         reportName = "TEST-app.getxray.xray.junit.customjunitxml.SimpleTestExample.xml";
         testsuite = readValidXmlFile(tempDirectory.resolve(reportName));
         assertThat(testsuite.children("testcase")).hasSize(2);
         assertThat(testsuite.children("testcase").matchAttr("name", "someSimpleTest")).isNotEmpty();
         assertThat(testsuite.children("testcase").matchAttr("name", "anotherSimpleTest")).isNotEmpty();
+        assertThat(testsuite.children("testcase").filter(context -> SIMPLE_CLASS.getName().equals(context.element().getAttribute("classname"))))
+                .hasSize(2);
     }
 
     @Test
@@ -114,8 +117,10 @@ class EnhancedLegacyXmlTest {
         Match testsuite = readValidXmlFile(tempDirectory.resolve(reportName));
         assertThat(testsuite.children("testcase")).hasSize(2);
 
-        Match someBasicTestTestCase = testsuite.children("testcase").matchAttr("name", "someBasicTest");
+        Match someBasicTestTestCase = testsuite.children("testcase").matchAttr("name", "NAME:someBasicTest");
         assertThat(someBasicTestTestCase).isNotEmpty();
+        assertThat(someBasicTestTestCase.attr("classname"))
+                .isEqualTo("CLASSNAME:" + BASIC_CLASS.getName());
         Match someBasicTestTestCaseProps = someBasicTestTestCase.children("properties").children("property");
         assertThat(someBasicTestTestCaseProps.matchAttr("name", "test_id").attr("value"))
                 .isEqualTo("ID:someBasicTest");
@@ -126,8 +131,10 @@ class EnhancedLegacyXmlTest {
         assertThat(someBasicTestTestCaseProps.matchAttr("name", "test_description").text())
                 .isEqualTo("DESCRIPTION:someBasicTest");
 
-        Match anotherBasicTestTestCase = testsuite.children("testcase").matchAttr("name", "anotherBasicTest");
+        Match anotherBasicTestTestCase = testsuite.children("testcase").matchAttr("name", "NAME:anotherBasicTest");
         assertThat(anotherBasicTestTestCase).isNotEmpty();
+        assertThat(anotherBasicTestTestCase.attr("classname"))
+                .isEqualTo("CLASSNAME:" + BASIC_CLASS.getName());
         Match anotherBasicTestTestCaseProps = anotherBasicTestTestCase.children("properties").children("property");
         assertThat(anotherBasicTestTestCaseProps.matchAttr("name", "test_id").attr("value"))
                 .isEqualTo("ID:anotherBasicTest");

@@ -39,9 +39,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectMethod;
 
-class DefaultXrayTestInfoReaderTest {
+class CustomXrayTestMetadataReaderTest {
 
-    private final XrayTestMetadataReader xrayTestMetadataReader = new DefaultXrayTestMetadataReader();
+    private final XrayTestMetadataReader customMetadataReader = new CustomXrayTestMetadataReader();
     private final Launcher launcher = LauncherFactory.create();
 
     private static TestDescriptor testWithXraytestAnnotation;
@@ -147,10 +147,10 @@ class DefaultXrayTestInfoReaderTest {
         // GIVEN
         TestIdentifier testIdentifier = TestIdentifier.from(testWithXraytestAnnotation);
         // WHEN
-        Optional<String> keyOpt = xrayTestMetadataReader.getKey(testIdentifier);
+        Optional<String> keyOpt = customMetadataReader.getKey(testIdentifier);
         // THEN
         assertThat(keyOpt)
-                .contains("ABC-123");
+                .contains("KEY:annotatedWithValues");
     }
 
     @Test
@@ -158,10 +158,10 @@ class DefaultXrayTestInfoReaderTest {
         // GIVEN
         TestIdentifier testIdentifier = TestIdentifier.from(testWithXraytestEmptyAnnotation);
         // WHEN
-        Optional<String> keyOpt = xrayTestMetadataReader.getKey(testIdentifier);
+        Optional<String> keyOpt = customMetadataReader.getKey(testIdentifier);
         // THEN
         assertThat(keyOpt)
-                .isEmpty();
+                .contains("KEY:annotatedWithEmptyValues");
     }
 
     @Test
@@ -169,10 +169,10 @@ class DefaultXrayTestInfoReaderTest {
         // GIVEN
         TestIdentifier testIdentifier = TestIdentifier.from(testNotAnnotated);
         // WHEN
-        Optional<String> keyOpt = xrayTestMetadataReader.getKey(testIdentifier);
+        Optional<String> keyOpt = customMetadataReader.getKey(testIdentifier);
         // THEN
         assertThat(keyOpt)
-                .isEmpty();
+                .contains("KEY:notAnnotatedTest");
     }
 
     @Test
@@ -180,10 +180,10 @@ class DefaultXrayTestInfoReaderTest {
         // GIVEN
         TestIdentifier testIdentifier = TestIdentifier.from(testWithXraytestAnnotation);
         // WHEN
-        Optional<String> idOpt = xrayTestMetadataReader.getId(testIdentifier);
+        Optional<String> idOpt = customMetadataReader.getId(testIdentifier);
         // THEN
         assertThat(idOpt)
-                .contains("868");
+                .contains("ID:annotatedWithValues");
     }
 
     @Test
@@ -191,10 +191,10 @@ class DefaultXrayTestInfoReaderTest {
         // GIVEN
         TestIdentifier testIdentifier = TestIdentifier.from(testWithXraytestEmptyAnnotation);
         // WHEN
-        Optional<String> idOpt = xrayTestMetadataReader.getId(testIdentifier);
+        Optional<String> idOpt = customMetadataReader.getId(testIdentifier);
         // THEN
         assertThat(idOpt)
-                .isEmpty();
+                .contains("ID:annotatedWithEmptyValues");
     }
 
     @Test
@@ -202,10 +202,10 @@ class DefaultXrayTestInfoReaderTest {
         // GIVEN
         TestIdentifier testIdentifier = TestIdentifier.from(testNotAnnotated);
         // WHEN
-        Optional<String> idOpt = xrayTestMetadataReader.getId(testIdentifier);
+        Optional<String> idOpt = customMetadataReader.getId(testIdentifier);
         // THEN
         assertThat(idOpt)
-                .isEmpty();
+                .contains("ID:notAnnotatedTest");
     }
 
     @Test
@@ -213,10 +213,10 @@ class DefaultXrayTestInfoReaderTest {
         // GIVEN
         TestIdentifier testIdentifier = TestIdentifier.from(testWithXraytestAnnotation);
         // WHEN
-        Optional<String> summaryOpt = xrayTestMetadataReader.getSummary(testIdentifier);
+        Optional<String> summaryOpt = customMetadataReader.getSummary(testIdentifier);
         // THEN
         assertThat(summaryOpt)
-                .contains("some summary");
+                .contains("SUMMARY:annotatedWithValues");
     }
 
     @Test
@@ -224,10 +224,10 @@ class DefaultXrayTestInfoReaderTest {
         // GIVEN
         TestIdentifier testIdentifier = TestIdentifier.from(testWithXraytestEmptyAnnotation);
         // WHEN
-        Optional<String> summaryOpt = xrayTestMetadataReader.getSummary(testIdentifier);
+        Optional<String> summaryOpt = customMetadataReader.getSummary(testIdentifier);
         // THEN
         assertThat(summaryOpt)
-                .isEmpty();
+                .contains("SUMMARY:annotatedWithEmptyValues");
     }
 
     @Test
@@ -235,10 +235,10 @@ class DefaultXrayTestInfoReaderTest {
         // GIVEN
         TestIdentifier testIdentifier = TestIdentifier.from(testNotAnnotated);
         // WHEN
-        Optional<String> summaryOpt = xrayTestMetadataReader.getSummary(testIdentifier);
+        Optional<String> summaryOpt = customMetadataReader.getSummary(testIdentifier);
         // THEN
         assertThat(summaryOpt)
-                .isEmpty();
+                .contains("SUMMARY:notAnnotatedTest");
     }
 
     @Test
@@ -246,10 +246,10 @@ class DefaultXrayTestInfoReaderTest {
         // GIVEN
         TestIdentifier testIdentifier = TestIdentifier.from(testWithDisplayNameAnnotation);
         // WHEN
-        Optional<String> summaryOpt = xrayTestMetadataReader.getSummary(testIdentifier);
+        Optional<String> summaryOpt = customMetadataReader.getSummary(testIdentifier);
         // THEN
         assertThat(summaryOpt)
-                .contains("display name");
+                .contains("SUMMARY:annotatedWithDisplayName");
     }
 
     @Test
@@ -257,10 +257,10 @@ class DefaultXrayTestInfoReaderTest {
         // GIVEN
         TestIdentifier testIdentifier = TestIdentifier.from(testWithXraytestAndDisplayNameAnnotation);
         // WHEN
-        Optional<String> summaryOpt = xrayTestMetadataReader.getSummary(testIdentifier);
+        Optional<String> summaryOpt = customMetadataReader.getSummary(testIdentifier);
         // THEN
         assertThat(summaryOpt)
-                .contains("xray summary");
+                .contains("SUMMARY:annotatedWithXrayTestAndDisplayName");
     }
 
     @Test
@@ -268,10 +268,10 @@ class DefaultXrayTestInfoReaderTest {
         // GIVEN
         TestIdentifier testIdentifier = TestIdentifier.from(testWithDisplayNameGenerator);
         // WHEN
-        Optional<String> summaryOpt = xrayTestMetadataReader.getSummary(testIdentifier);
+        Optional<String> summaryOpt = customMetadataReader.getSummary(testIdentifier);
         // THEN
         assertThat(summaryOpt)
-                .contains("DisplayNameForMethod");
+                .contains("SUMMARY:withDisplayNameGenerator");
     }
 
     @Test
@@ -279,10 +279,10 @@ class DefaultXrayTestInfoReaderTest {
         // GIVEN
         TestIdentifier testIdentifier = TestIdentifier.from(testWithTestFactoryAnnotation);
         // WHEN
-        Optional<String> summaryOpt = xrayTestMetadataReader.getSummary(testIdentifier);
+        Optional<String> summaryOpt = customMetadataReader.getSummary(testIdentifier);
         // THEN
         assertThat(summaryOpt)
-                .contains("withTestFactory()");
+                .contains("SUMMARY:withTestFactory");
     }
 
     @Test
@@ -290,10 +290,10 @@ class DefaultXrayTestInfoReaderTest {
         // GIVEN
         TestIdentifier testIdentifier = TestIdentifier.from(testWithXraytestAnnotation);
         // WHEN
-        Optional<String> descriptionOpt = xrayTestMetadataReader.getDescription(testIdentifier);
+        Optional<String> descriptionOpt = customMetadataReader.getDescription(testIdentifier);
         // THEN
         assertThat(descriptionOpt)
-                .contains("some description");
+                .contains("DESCRIPTION:annotatedWithValues");
     }
 
     @Test
@@ -301,10 +301,10 @@ class DefaultXrayTestInfoReaderTest {
         // GIVEN
         TestIdentifier testIdentifier = TestIdentifier.from(testWithXraytestEmptyAnnotation);
         // WHEN
-        Optional<String> descriptionOpt = xrayTestMetadataReader.getDescription(testIdentifier);
+        Optional<String> descriptionOpt = customMetadataReader.getDescription(testIdentifier);
         // THEN
         assertThat(descriptionOpt)
-                .isEmpty();
+                .contains("DESCRIPTION:annotatedWithEmptyValues");
     }
 
     @Test
@@ -312,10 +312,10 @@ class DefaultXrayTestInfoReaderTest {
         // GIVEN
         TestIdentifier testIdentifier = TestIdentifier.from(testNotAnnotated);
         // WHEN
-        Optional<String> descriptionOpt = xrayTestMetadataReader.getDescription(testIdentifier);
+        Optional<String> descriptionOpt = customMetadataReader.getDescription(testIdentifier);
         // THEN
         assertThat(descriptionOpt)
-                .isEmpty();
+                .contains("DESCRIPTION:notAnnotatedTest");
     }
 
     @Test
@@ -323,10 +323,10 @@ class DefaultXrayTestInfoReaderTest {
         // GIVEN
         TestIdentifier testIdentifier = TestIdentifier.from(testWithXraytestAnnotation);
         // WHEN
-        List<String> requirements = xrayTestMetadataReader.getRequirements(testIdentifier);
+        List<String> requirements = customMetadataReader.getRequirements(testIdentifier);
         // THEN
         assertThat(requirements)
-                .containsExactly("REQ-1", "REQ-2");
+                .isEmpty();
     }
 
     @Test
@@ -334,7 +334,7 @@ class DefaultXrayTestInfoReaderTest {
         // GIVEN
         TestIdentifier testIdentifier = TestIdentifier.from(testWithXraytestEmptyAnnotation);
         // WHEN
-        List<String> requirements = xrayTestMetadataReader.getRequirements(testIdentifier);
+        List<String> requirements = customMetadataReader.getRequirements(testIdentifier);
         // THEN
         assertThat(requirements)
                 .isEmpty();
@@ -345,7 +345,7 @@ class DefaultXrayTestInfoReaderTest {
         // GIVEN
         TestIdentifier testIdentifier = TestIdentifier.from(testNotAnnotated);
         // WHEN
-        List<String> requirements = xrayTestMetadataReader.getRequirements(testIdentifier);
+        List<String> requirements = customMetadataReader.getRequirements(testIdentifier);
         // THEN
         assertThat(requirements)
                 .isEmpty();
@@ -359,10 +359,10 @@ class DefaultXrayTestInfoReaderTest {
         assertThat(testIdentifiers)
                 .hasSize(1)
                 .allSatisfy(testIdentifier -> {
-                    assertThat(xrayTestMetadataReader.getName(testIdentifier))
-                            .isEqualTo("legacyTest");
-                    assertThat(xrayTestMetadataReader.getClassName(testIdentifier, testPlan))
-                            .isEqualTo(XrayEnabledTestExamples.class.getName());
+                    assertThat(customMetadataReader.getName(testIdentifier))
+                            .isEqualTo("NAME:legacyTest");
+                    assertThat(customMetadataReader.getClassName(testIdentifier, testPlan))
+                            .isEqualTo("CLASSNAME:" + XrayEnabledTestExamples.class.getName());
                 });
     }
 
@@ -374,10 +374,10 @@ class DefaultXrayTestInfoReaderTest {
         assertThat(testIdentifiers)
                 .hasSize(1)
                 .allSatisfy(testIdentifier -> {
-                    assertThat(xrayTestMetadataReader.getName(testIdentifier))
-                            .isEqualTo("annotatedWithDisplayName");
-                    assertThat(xrayTestMetadataReader.getClassName(testIdentifier, testPlan))
-                            .isEqualTo(XrayEnabledTestExamples.class.getName());
+                    assertThat(customMetadataReader.getName(testIdentifier))
+                            .isEqualTo("NAME:annotatedWithDisplayName");
+                    assertThat(customMetadataReader.getClassName(testIdentifier, testPlan))
+                            .isEqualTo("CLASSNAME:" + XrayEnabledTestExamples.class.getName());
                 });
     }
 
@@ -389,10 +389,10 @@ class DefaultXrayTestInfoReaderTest {
         assertThat(testIdentifiers)
                 .hasSize(4)
                 .allSatisfy(testIdentifier -> {
-                    assertThat(xrayTestMetadataReader.getName(testIdentifier))
-                            .isEqualTo("parameterizedTestWithoutDisplayName");
-                    assertThat(xrayTestMetadataReader.getClassName(testIdentifier, testPlan))
-                            .isEqualTo(XrayEnabledTestExamples.class.getName());
+                    assertThat(customMetadataReader.getName(testIdentifier))
+                            .isEqualTo("NAME:parameterizedTestWithoutDisplayName");
+                    assertThat(customMetadataReader.getClassName(testIdentifier, testPlan))
+                            .isEqualTo("CLASSNAME:" + XrayEnabledTestExamples.class.getName());
                 });
     }
 
@@ -404,10 +404,10 @@ class DefaultXrayTestInfoReaderTest {
         assertThat(testIdentifiers)
                 .hasSize(4)
                 .allSatisfy(testIdentifier -> {
-                    assertThat(xrayTestMetadataReader.getName(testIdentifier))
-                            .isEqualTo("parameterizedTestAnnotatedWithDisplayName");
-                    assertThat(xrayTestMetadataReader.getClassName(testIdentifier, testPlan))
-                            .isEqualTo(XrayEnabledTestExamples.class.getName());
+                    assertThat(customMetadataReader.getName(testIdentifier))
+                            .isEqualTo("NAME:parameterizedTestAnnotatedWithDisplayName");
+                    assertThat(customMetadataReader.getClassName(testIdentifier, testPlan))
+                            .isEqualTo("CLASSNAME:" + XrayEnabledTestExamples.class.getName());
                 });
     }
 
@@ -419,10 +419,10 @@ class DefaultXrayTestInfoReaderTest {
         assertThat(testIdentifiers)
                 .hasSize(3)
                 .allSatisfy(testIdentifier -> {
-                    assertThat(xrayTestMetadataReader.getName(testIdentifier))
-                            .isEqualTo("repeatedTestAnnotatedWithDisplayName");
-                    assertThat(xrayTestMetadataReader.getClassName(testIdentifier, testPlan))
-                            .isEqualTo(XrayEnabledTestExamples.class.getName());
+                    assertThat(customMetadataReader.getName(testIdentifier))
+                            .isEqualTo("NAME:repeatedTestAnnotatedWithDisplayName");
+                    assertThat(customMetadataReader.getClassName(testIdentifier, testPlan))
+                            .isEqualTo("CLASSNAME:" + XrayEnabledTestExamples.class.getName());
                 });
     }
 
@@ -434,10 +434,10 @@ class DefaultXrayTestInfoReaderTest {
         assertThat(testIdentifiers)
                 .hasSize(3)
                 .allSatisfy(testIdentifier -> {
-                    assertThat(xrayTestMetadataReader.getName(testIdentifier))
-                            .isEqualTo("repeatedTestAnnotatedWithoutDisplayName");
-                    assertThat(xrayTestMetadataReader.getClassName(testIdentifier, testPlan))
-                            .isEqualTo(XrayEnabledTestExamples.class.getName());
+                    assertThat(customMetadataReader.getName(testIdentifier))
+                            .isEqualTo("NAME:repeatedTestAnnotatedWithoutDisplayName");
+                    assertThat(customMetadataReader.getClassName(testIdentifier, testPlan))
+                            .isEqualTo("CLASSNAME:" + XrayEnabledTestExamples.class.getName());
                 });
     }
 
@@ -449,10 +449,10 @@ class DefaultXrayTestInfoReaderTest {
         assertThat(testIdentifiers)
                 .hasSize(1)
                 .allSatisfy(testIdentifier -> {
-                    assertThat(xrayTestMetadataReader.getName(testIdentifier))
-                            .isEqualTo("dynamicTestsFromCollection");
-                    assertThat(xrayTestMetadataReader.getClassName(testIdentifier, testPlan))
-                            .isEqualTo(XrayEnabledTestExamples.class.getName());
+                    assertThat(customMetadataReader.getName(testIdentifier))
+                            .isEqualTo("NAME:dynamicTestsFromCollection");
+                    assertThat(customMetadataReader.getClassName(testIdentifier, testPlan))
+                            .isEqualTo("CLASSNAME:" + XrayEnabledTestExamples.class.getName());
                 });
     }
 
@@ -464,10 +464,10 @@ class DefaultXrayTestInfoReaderTest {
         assertThat(testIdentifiers)
                 .hasSize(1)
                 .allSatisfy(testIdentifier -> {
-                    assertThat(xrayTestMetadataReader.getName(testIdentifier))
-                            .isEqualTo("nestedTest");
-                    assertThat(xrayTestMetadataReader.getClassName(testIdentifier, testPlan))
-                            .isEqualTo(XrayEnabledTestExamples.NestedClass.class.getName());
+                    assertThat(customMetadataReader.getName(testIdentifier))
+                            .isEqualTo("NAME:nestedTest");
+                    assertThat(customMetadataReader.getClassName(testIdentifier, testPlan))
+                            .isEqualTo("CLASSNAME:" + XrayEnabledTestExamples.NestedClass.class.getName());
                 });
     }
 }
