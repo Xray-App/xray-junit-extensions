@@ -71,11 +71,6 @@ class EnhancedLegacyXmlTest {
     private static final Class BASIC_CLASS = BasicTestExample.class;
     private static final Class SIMPLE_CLASS = SimpleTestExample.class;
 
-
-    private static final Runnable FAILING_BLOCK = () -> fail("should fail");
-    private static final Runnable SUCCEEDING_TEST = () -> {
-    };
-
 	@TempDir
 	Path tempDirectory;
     private static final String REPORT_NAME = "TEST-junit-jupiter.xml";
@@ -568,19 +563,14 @@ class EnhancedLegacyXmlTest {
         Launcher launcher = LauncherFactory.create();
 
         EnhancedLegacyXmlReportGeneratingListener listener = mock(EnhancedLegacyXmlReportGeneratingListener.class);
-        //EnhancedLegacyXmlReportGeneratingListener listener = new EnhancedLegacyXmlReportGeneratingListener(tempDirectory, new PrintWriter(System.out));
         launcher.execute(discoveryRequest, listener);    
 
         ArgumentCaptor<TestPlan> testPlanArgumentCaptor = ArgumentCaptor.forClass(TestPlan.class);
 		InOrder inOrder = inOrder(listener);
 		inOrder.verify(listener).testPlanExecutionStarted(testPlanArgumentCaptor.capture());
-		// TestPlan testPlan = testPlanArgumentCaptor.getValue();
-		//TestIdentifier testIdentifier = testPlan.getTestIdentifier("test.getUniqueId().toString()");
 
         ArgumentCaptor<ReportEntry> reportEntryArgumentCaptor = ArgumentCaptor.forClass(ReportEntry.class);
-		//inOrder.verify(listener).reportingEntryPublished(same(testIdentifier), reportEntryArgumentCaptor.capture());
         inOrder.verify(listener, times(1)).reportingEntryPublished(any(TestIdentifier.class), reportEntryArgumentCaptor.capture());
-		//Mockito.verify(listener).executionFinished(testIdentifier, successful());
 		ReportEntry reportEntry = reportEntryArgumentCaptor.getValue();
 		assertThat(reportEntry.getKeyValuePairs()).containsExactly(entry("xray:comment", "hello"));
     }
@@ -599,19 +589,12 @@ class EnhancedLegacyXmlTest {
         ArgumentCaptor<TestPlan> testPlanArgumentCaptor = ArgumentCaptor.forClass(TestPlan.class);
 		InOrder inOrder = inOrder(listener);
 		inOrder.verify(listener).testPlanExecutionStarted(testPlanArgumentCaptor.capture());
-		TestPlan testPlan = testPlanArgumentCaptor.getValue();
+		//TestPlan testPlan = testPlanArgumentCaptor.getValue();
 		//TestIdentifier testIdentifier = testPlan.getTestIdentifier("test.getUniqueId().toString()");
 
         ArgumentCaptor<ReportEntry> reportEntryArgumentCaptor = ArgumentCaptor.forClass(ReportEntry.class);
 		//inOrder.verify(listener).reportingEntryPublished(same(testIdentifier), reportEntryArgumentCaptor.capture());
         inOrder.verify(listener, times(2)).reportingEntryPublished(any(TestIdentifier.class), reportEntryArgumentCaptor.capture());
-		//Mockito.verify(listener).executionFinished(testIdentifier, successful());
-		//ReportEntry reportEntry = reportEntryArgumentCaptor.getValue();
-		//assertThat(reportEntry.getKeyValuePairs()).containsExactly(entry("xray:comment", "hellso"));//, entry("xray:comment", "world"));
-
-
-        //List<Map<String,String>> entries = reportEntryArgumentCaptor.getAllValues().stream().flatMap(reportEntry -> reportEntry.getKeyValuePairs()).collect(Collectors.toList());
-        //assertThat(entries).containsExactly(entry("xray:comment", "hello"), entry("xray:comment", "world"));
 
         assertThat(reportEntryArgumentCaptor.getAllValues().get(0).getKeyValuePairs()).containsExactly(entry("xray:comment", "hello"));
         assertThat(reportEntryArgumentCaptor.getAllValues().get(1).getKeyValuePairs()).containsExactly(entry("xray:comment", "world"));
