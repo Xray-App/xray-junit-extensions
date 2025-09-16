@@ -49,7 +49,7 @@ Add the following dependency to your pom.xml:
         <dependency>
           <groupId>app.getxray</groupId>
           <artifactId>xray-junit-extensions</artifactId>
-          <version>0.10.0</version>
+          <version>0.11.0</version>
           <scope>test</scope>
         </dependency>
 ```
@@ -223,6 +223,7 @@ The `XrayTestMetadataReader` interface defines a set of methods for extracting s
 | `getSummary` | Returns the test summary, if available. | Reads the `summary` attribute from the `@XrayTest` annotation, falling back to `@DisplayName` or the test method name. | `@XrayTest(summary = "My summary")` |
 | `getDescription`| Returns the test description, if available. | Reads the `description` attribute from the `@XrayTest` annotation. | `@XrayTest(description = "...")` |
 | `getRequirements`| Returns a list of requirements associated with the test. | Reads the values from the `@Requirement` annotation. | `@Requirement("REQ-456")` |
+| `getTags` | Returns a list of tags assigned to the test. | Reads the values from JUnit `@Tag` annotations | `@Tag("performance")` | 
 
 #### The DefaultXrayTestMetadataReader class
 
@@ -255,7 +256,6 @@ package com.example;
 
 import app.getxray.xray.junit.customjunitxml.DefaultXrayTestMetadataReader;
 import org.junit.platform.launcher.TestIdentifier;
-
 import java.util.Optional;
 
 public class CustomTestMetadataReader extends DefaultXrayTestMetadataReader {
@@ -284,6 +284,8 @@ package com.example;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
+import com.example.JiraKey;
 
 class SimpleTest {
 
@@ -307,7 +309,6 @@ package com.example;
 
 import app.getxray.xray.junit.customjunitxml.DefaultXrayTestMetadataReader;
 import org.junit.platform.launcher.TestIdentifier;
-
 import java.util.Optional;
 
 public class CustomTestMetadataReader extends DefaultXrayTestMetadataReader {
@@ -330,6 +331,7 @@ package com.example;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 class SimpleTest {
 
@@ -354,7 +356,7 @@ The summary of the Test issue will be set based on these rules (the first that a
 * based on the test's method name.
 
 > [!TIP]
-> This behavior can be changed by defining a custom test metadata reader.
+> This behavior can be changed by defining a custom test metadata reader as detailed above.
 
 ### Parameterized and repeated tests
 
@@ -369,11 +371,6 @@ However, the format produced by JUnit 4 is limited and cannot be extended.
 Junit 5 has a more flexible architecture. Even though JUnit XML format as not evolved meanwhile, it's possible to use Extensions and Test Execution Listeners to implement our own, tailored custom reporter.
 
 JUnit 5 provides a [legacy XML reporter for the jupiter engine](https://junit.org/junit5/docs/current/api/org.junit.platform.reporting/org/junit/platform/reporting/legacy/xml/LegacyXmlReportGeneratingListener.html) as a listener, which was used as basis for this implementation.
-
-
-## TO DOs
-
-...
 
 ## FAQ
 
