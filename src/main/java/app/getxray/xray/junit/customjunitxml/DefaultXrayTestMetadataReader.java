@@ -16,6 +16,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.platform.commons.support.AnnotationSupport;
+import org.junit.platform.engine.TestTag;
 import org.junit.platform.engine.support.descriptor.MethodSource;
 import org.junit.platform.launcher.TestIdentifier;
 
@@ -24,6 +25,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class DefaultXrayTestMetadataReader implements XrayTestMetadataReader {
 
@@ -78,6 +80,15 @@ public class DefaultXrayTestMetadataReader implements XrayTestMetadataReader {
                 .map(Requirement::value)
                 .map(arr -> Collections.unmodifiableList(Arrays.asList(arr)))
                 .orElse(Collections.emptyList());
+    }
+
+    @Override
+    public List<String> getTags(TestIdentifier testIdentifier) {
+        return testIdentifier.getTags()
+                .stream()
+                .map(TestTag::getName)
+                .map(String::trim)
+                .collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
     }
 
     protected <A extends Annotation> Optional<A> getTestMethodAnnotation(TestIdentifier testIdentifier, Class<A> aClass) {

@@ -70,4 +70,9 @@ public class CustomXrayTestMetadataReader implements XrayTestMetadataReader {
     public List<String> getRequirements(TestIdentifier testIdentifier) {
         return Collections.emptyList();
     }
+
+    @Override
+    public List<String> getTags(TestIdentifier testIdentifier) {
+        return Collections.emptyList();
+    }
 }

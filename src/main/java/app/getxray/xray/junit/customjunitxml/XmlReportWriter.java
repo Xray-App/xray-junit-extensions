@@ -15,7 +15,6 @@ import org.junit.platform.commons.logging.LoggerFactory;
 import org.junit.platform.commons.support.AnnotationSupport;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.TestSource;
-import org.junit.platform.engine.TestTag;
 import org.junit.platform.engine.reporting.ReportEntry;
 import org.junit.platform.engine.support.descriptor.MethodSource;
 import org.junit.platform.launcher.TestIdentifier;
@@ -296,8 +295,7 @@ class XmlReportWriter {
 			addProperty(writer, "test_summary", testSummaryOpt.get());
 		}
 
-		List<String> tags = testIdentifier.getTags().stream().map(TestTag::getName).map(String::trim)
-				.collect(Collectors.toList());
+		List<String> tags = xrayTestMetadataReader.getTags(testIdentifier);
 		if (!tags.isEmpty()) {
 			addProperty(writer, "tags", String.join(",", tags));
 		}

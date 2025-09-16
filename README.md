@@ -195,7 +195,7 @@ public class XrayEnabledTestExamples {
 ### Customizing how test metadata is read
 
 When generating the report, it's allowed to customize the way the test method information is read.
-By default, test information such as id, key, summary, description and requirements are read directly from @XrayTest and @Requirements annotations.
+By default, test information such as id, key, summary, description, requirements and labels are read directly from @XrayTest, @Requirements and JUnits @Tag annotations.
 This behavior can be overridden by the user when he wants to change the way these meta-information are generated, or when he wants to use their own annotations to describe the tests.
 
 To do this, you need to create a public class with a no-argument constructor that implements the `app.getxray.xray.junit.customjunitxml.XrayTestMetadataReader` interface (or extend `app.getxray.xray.junit.customjunitxml.DefaultXrayTestMetadataReader` class).
@@ -296,13 +296,60 @@ class SimpleTest {
 }
 ```
 
+#### Example: Custom test metadata reader to ignore JUnits @Tag annotation
+
+In case of using JUnit @Tag annotations in your tests, but you don't want these tags to be used as labels in Xray, 
+you can create a custom test metadata reader that ignores them.
+
+_CustomTestMetadataReader.java_
+```java
+package com.example;
+
+import app.getxray.xray.junit.customjunitxml.DefaultXrayTestMetadataReader;
+import org.junit.platform.launcher.TestIdentifier;
+
+import java.util.Optional;
+
+public class CustomTestMetadataReader extends DefaultXrayTestMetadataReader {
+
+    @Override
+    public List<String> getTags(TestIdentifier testIdentifier) {
+        return List.of(); // ignore JUnit @Tag annotations
+    }
+}
+```
+
+_xray-junit-extensions.properties_
+```
+test_metadata_reader=com.example.CustomTestMetadataReader
+```
+
+_SimpleTest.java_
+```java
+package com.example;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+class SimpleTest {
+
+    @Test
+    @Tag("hide me in Xray report")
+    @Tag("and me too")
+    @DisplayName("simple test")
+    void simpleTest() {
+        // ...
+    }
+}
+```
+
 ## Other features and limitations
 
 ### Name of Tests
 
 The summary of the Test issue will be set based on these rules (the first that applies):
 
-* based on the summary attribute of @XrayTest annotation (e.g. `@XrayTest(summary = "xxx")`); 
+* based on the summary attribute of @XrayTest annotation (e.g. `@XrayTest(summary = "xxx")`);
 * based on the `@DisplayName` annotation, or the display name of dynamically created tests from a TestFactory;
 * based on the test's method name.
 
