@@ -31,7 +31,7 @@ jobs:
       name: Install gpg secret key
       run: |
         # Install gpg secret key
-        cat <(echo -e "${{ secrets.OSSRH_GPG_SECRET_KEY }}") | gpg --batch --import
+        cat <(echo -e "${{ secrets.GPG_SECRET_KEY }}") | gpg --batch --import
         # Verify gpg secret key
         gpg --list-secret-keys --keyid-format LONG
     - name: Build and deploy with Maven
@@ -39,4 +39,4 @@ jobs:
         MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
       run: |
-        mvn --batch-mode -Dgpg.passphrase=${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }} clean compile verify package javadoc:aggregate-jar deploy
+        mvn --batch-mode -Dgpg.passphrase="" clean compile verify package javadoc:aggregate-jar deploy
