@@ -48,7 +48,7 @@
         <mockito.version>4.3.1</mockito.version>
         <slf4j-log4j12.version>1.7.25</slf4j-log4j12.version>
         <version.maven-plugin-plugin>3.6.0</version.maven-plugin-plugin>
-        <nexus-staging-maven-plugin.version>1.6.13</nexus-staging-maven-plugin.version>
+        <nexus-staging-maven-plugin.version>1.7.0</nexus-staging-maven-plugin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>17</java.version>
@@ -130,30 +130,21 @@
         </dependency> 
     </dependencies>
 
-   <distributionManagement>
-    <snapshotRepository>
-      <id>ossrh</id>
-      <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-    </snapshotRepository>
-    <repository>
-      <id>ossrh</id>
-      <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-    </repository>
-   </distributionManagement>
-
     <build>
         <plugins>
+            
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
                 <version>${nexus-staging-maven-plugin.version}</version>
                 <extensions>true</extensions>
                 <configuration>
-                  <serverId>ossrh</serverId>
-                  <nexusUrl>https://s01.oss.sonatype.org</nexusUrl>
+                  <serverId>central-portal</serverId>
+                  <nexusUrl>https://ossrh-staging-api.central.sonatype.com</nexusUrl>
                   <autoReleaseAfterClose>true</autoReleaseAfterClose>
                 </configuration>
             </plugin>
+  
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
