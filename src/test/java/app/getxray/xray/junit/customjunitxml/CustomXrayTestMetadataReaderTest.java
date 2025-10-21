@@ -27,6 +27,7 @@ import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 import org.junit.platform.launcher.core.LauncherFactory;
+import org.junit.platform.testkit.engine.EngineTestKit;
 
 import java.util.Collections;
 import java.util.List;
@@ -38,6 +39,9 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectMethod;
+import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.discoveryRequest;
+import static org.mockito.Mockito.mock;
+import org.junit.platform.engine.OutputDirectoryCreator;
 
 class CustomXrayTestMetadataReaderTest {
 
@@ -72,29 +76,11 @@ class CustomXrayTestMetadataReaderTest {
 
     @BeforeAll
     static void setUp() throws NoSuchMethodException {
-        JupiterConfiguration jupiterConfiguration = new DefaultJupiterConfiguration(
-                new ConfigurationParameters() {
-                    @Override
-                    public Optional<String> get(String key) {
-                        return Optional.empty();
-                    }
-
-                    @Override
-                    public Optional<Boolean> getBoolean(String key) {
-                        return Optional.empty();
-                    }
-
-                    @Override
-                    public int size() {
-                        return 0;
-                    }
-
-                    @Override
-                    public Set<String> keySet() {
-                        return Collections.emptySet();
-                    }
-                }, null
-        );
+        LauncherDiscoveryRequest discoveryRequest = discoveryRequest()
+                .selectors(selectClass(MockedTestClass.class), selectClass(MockedTestWithDisplayNameGeneratorClass.class))
+                .build();
+        OutputDirectoryCreator dummyOutputDirectoryCreator = discoveryRequest.getOutputDirectoryCreator();
+        JupiterConfiguration jupiterConfiguration = new DefaultJupiterConfiguration(mock(), dummyOutputDirectoryCreator, mock());
 
         Supplier<List<Class<?>>> emptySupplier = () -> Collections.emptyList();
 
