@@ -74,11 +74,7 @@ class DefaultXrayTestInfoReaderTest {
 
     @BeforeAll
     static void setUp() throws NoSuchMethodException {
-        LauncherDiscoveryRequest discoveryRequest = discoveryRequest()
-                .selectors(selectClass(MockedTestClass.class), selectClass(MockedTestWithDisplayNameGeneratorClass.class))
-                .build();
-        OutputDirectoryCreator dummyOutputDirectoryCreator = discoveryRequest.getOutputDirectoryCreator();
-        JupiterConfiguration jupiterConfiguration = new DefaultJupiterConfiguration(mock(), dummyOutputDirectoryCreator, mock());
+        JupiterConfiguration jupiterConfiguration = new DefaultJupiterConfiguration(mock(), mock(), mock());
 
         Supplier<List<Class<?>>> emptySupplier = () -> Collections.emptyList();
 
