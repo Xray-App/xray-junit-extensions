@@ -4,11 +4,11 @@
 [![Known Vulnerabilities](https://snyk.io/test/github/Xray-App/xray-junit-extensions/badge.svg)](https://snyk.io/test/github/Xray-App/xray-junit-extensions)
 ![code coverage](
 https://raw.githubusercontent.com/Xray-App/xray-junit-extensions/main/.github/badges/jacoco.svg)
-[![license](https://img.shields.io/badge/License-EPL%202.0-green.svg)](https://opensource.org/licenses/EPL-2.0)
-[![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/Xray-App/community)
-[![Maven Central Version](https://img.shields.io/maven-central/v/app.getxray/xray-junit-extensions)](https://central.sonatype.com/artifact/app.getxray/xray-junit-extensions/)
+[![license](https://img.shields.io/badge/License-EPL%202.0-green.svg)](https://opensource.org/license/EPL-2.0)
+[![Gitter chat](https://badges.gitter.im/repo.png)](https://app.gitter.im/#/room/#Xray-App_community:gitter.im)
+[![Maven Central Version](https://img.shields.io/maven-central/v/app.getxray/xray-junit-extensions)](https://central.sonatype.com/artifact/app.getxray/xray-junit-extensions)
 
-This repo contains several improvements for [JUnit](https://junit.org/junit5/) that allow you to take better advantage of JUnit 5 (jupiter engine) whenever using it together with [Xray Test Management](https://getxray.app).
+This repo contains several improvements for [JUnit](https://junit.org) that allow you to take better advantage of JUnit 5/6 (jupiter engine) whenever using it together with [Xray Test Management](https://getxray.app).
 This code is provided as-is; you're free to use it and modify it at your will (see license ahead).
 
 This is a preliminary release so it is subject to changes, at any time.
@@ -37,7 +37,7 @@ The project consists of:
 
 - **EnhancedLegacyXmlReportGeneratingListener**: a custom TestExecutionListener implementation that is responsible for generating a custom JUnit XML with additional properties Xray can take advantage of
 - **@XrayTest**, **@Requirement**: new, optional annotations to provide additional information whenever writing the automated test methods
-- **XrayTestReporterParameterResolver**: a new, optional JUnit 5 extension that provides the means to report additional information to Xray, inside the test method flow
+- **XrayTestReporterParameterResolver**: a new, optional JUnit 5/6 extension that provides the means to report additional information to Xray, inside the test method flow
 
 ## Installing
 
@@ -78,7 +78,7 @@ test_metadata_reader=com.example.CustomTestMetadataReader
 
 ## How to use
 
-In order to generate the enhanced, customized JUnit XML report we need to register the **EnhancedLegacyXmlReportGeneratingListener** listener. This can be done in [several ways](https://junit.org/junit5/docs/current/user-guide/#launcher-api-listeners-custom):
+In order to generate the enhanced, customized JUnit XML report we need to register the **EnhancedLegacyXmlReportGeneratingListener** listener. This can be done in [several ways](https://docs.junit.org/current/user-guide/#launcher-api-listeners-custom):
 
 - discovered automatically at runtime based on the contents of a file (e.g `src/test/resources/META-INF/services/org.junit.platform.launcher.TestExecutionListener`) 
 
@@ -163,7 +163,7 @@ _Examples:_
 
 ### New Extension
 
-A new JUnit 5 compatible Extension **XrayTestReporterParameterResolver** can be used, so we can inject a **XrayTestReporter** object as argument in the test methods.
+A new JUnit 5/6 compatible Extension **XrayTestReporterParameterResolver** can be used, so we can inject a **XrayTestReporter** object as argument in the test methods.
 
 It allows to:
 
@@ -368,14 +368,14 @@ The same happens with repeated tests (i.e annotated with `@RepeatedTest`).
 With JUnit 4 and surefire, legacy JUnit XML reports can be produced. These are used by many tools, including CI, and test management tools (e.g. Xray).
 However, the format produced by JUnit 4 is limited and cannot be extended.
 
-Junit 5 has a more flexible architecture. Even though JUnit XML format as not evolved meanwhile, it's possible to use Extensions and Test Execution Listeners to implement our own, tailored custom reporter.
+Junit 5/6 has a more flexible architecture. Even though JUnit XML format as not evolved meanwhile, it's possible to use Extensions and Test Execution Listeners to implement our own, tailored custom reporter.
 
-JUnit 5 provides a [legacy XML reporter for the jupiter engine](https://junit.org/junit5/docs/current/api/org.junit.platform.reporting/org/junit/platform/reporting/legacy/xml/LegacyXmlReportGeneratingListener.html) as a listener, which was used as basis for this implementation.
+JUnit 5/6 provides a [legacy XML reporter for the jupiter engine](https://docs.junit.org/current/api/org.junit.platform.reporting/org/junit/platform/reporting/legacy/xml/LegacyXmlReportGeneratingListener.html) as a listener, which was used as basis for this implementation.
 
 ## FAQ
 
 1. Can this be used with JUnit 4?
-No. If you're using JUnit 4 you can still generate a "standard" JUnit XML report but you'll miss the capabilities provided by this project. It's recommended to use JUnit 5 as JUnit 4 is an older project and much more limited.
+No. If you're using JUnit 4 you can still generate a "standard" JUnit XML report but you'll miss the capabilities provided by this project. It's recommended to use JUnit 5/6 as JUnit 4 is an older project and much more limited.
 
 2. Is this format compatible with Jenkins and other tools?
 Probably. As there is no official JUnit XML schema, it's hard to say that in advance. However, the new information being embed on the custom JUnit XML report is done in such a way that shouldn't break other tools.
@@ -391,18 +391,18 @@ You're probably using the legacy JUnit report and not the one generated by this 
 
 ## Contact
 
-You may find me on [Twitter](https://twitter.com/darktelecom).
+You may find me on [X](https://x.com/darktelecom) or on [Bluesky](https://bsky.app/profile/darktelecom.bsky.social).
 Any questions related with this code, please raise issues in this GitHub project. Feel free to contribute and submit PR's.
-For Xray specific questions, please contact [Xray's support team](https://jira.getxray.app/servicedesk/customer/portal/2).
+For Xray specific questions, please contact [Xray's support team](ttps://jira.getxray.app/servicedesk/customer/portal/2/user/login?destination=portal%2F2).
 
 ## References
 
-- [JUnit 5 User Guide](https://junit.org/junit5/docs/current/user-guide/)
+- [JUnit User Guide](https://docs.junit.org/current/user-guide/)
 - [How Xray processes JUnit XML reports](https://docs.getxray.app/display/XRAYCLOUD/Taking+advantage+of+JUnit+XML+reports)
-- [JUnit 5 legacy XML reporter](https://junit.org/junit5/docs/current/api/org.junit.platform.reporting/org/junit/platform/reporting/legacy/xml/LegacyXmlReportGeneratingListener.html)
+- [JUnit 5/6 legacy XML reporter](https://docs.junit.org/current/api/org.junit.platform.reporting/org/junit/platform/reporting/legacy/xml/LegacyXmlReportGeneratingListener.html)
 
 ## LICENSE
 
-Based on code from [JUnit5](https://github.com/junit-team/junit5/) project.
+Based on code from [JUnit5](https://github.com/junit-team/junit-framework) project.
 
 [Eclipse Public License - v 2.0](LICENSE)

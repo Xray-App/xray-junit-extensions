@@ -4,9 +4,9 @@
     <groupId>app.getxray</groupId>
     <artifactId>xray-junit-extensions</artifactId>
     <packaging>jar</packaging>
-    <version>0.12.0</version>
+    <version>1.0.0</version>
     <name>xray-junit-extensions</name>
-    <description>Improvements for JUnit that allow you to take better advantage of JUnit 5 (jupiter engine) whenever using it together with Xray Test Management.</description>
+    <description>Improvements for JUnit that allow you to take better advantage of JUnit 5/6 (jupiter engine) whenever using it together with Xray Test Management.</description>
     <url>https://github.com/Xray-App/xray-junit-extensions</url>
   
     <licenses>
@@ -38,14 +38,14 @@
     </developers>
   
     <scm>
-      <connection>scm:git:git://github.com/Xray-App/xray-junit-extensions.git</connection>
+      <connection>scm:git:git://github.com/Xray-App/xray-§-extensions.git</connection>
       <developerConnection>scm:git:ssh://github.com/Xray-App/xray-junit-extensions.git</developerConnection>
       <url>https://github.com/Xray-App/xray-maven-plugin/tree/main</url>
     </scm>
 
     <properties>
-        <junit.version>5.14.0</junit.version>
-        <mockito.version>4.3.1</mockito.version>
+        <junit.version>6.0.0</junit.version>
+        <mockito.version>5.20.0</mockito.version>
         <slf4j-log4j12.version>1.7.25</slf4j-log4j12.version>
         <version.maven-plugin-plugin>3.6.0</version.maven-plugin-plugin>
         <nexus-staging-maven-plugin.version>1.7.0</nexus-staging-maven-plugin.version>
@@ -163,10 +163,10 @@
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <groupId>org.apache.maven.plugins</groupId>
-                <version>3.14.0</version>
+                <version>3.14.1</version>
                 <configuration>
                     <debug>true</debug>
-                    <release>11</release>
+                    <release>${java.version}</release>
                     <compilerArgs>
                         <!-- this flag is required in order to obtain the name of parameters in test methods -->
                         <arg>-parameters</arg>
@@ -209,7 +209,9 @@
                 <version>3.5.4</version>
                 <configuration>
                     <testFailureIgnore>false</testFailureIgnore>
-                    <disableXmlReport>true</disableXmlReport>
+                    <statelessTestsetReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5Xml30StatelessReporter">
+                        <disable>true</disable>
+                    </statelessTestsetReporter>
                     <useFile>false</useFile>
                     <excludes>
                         <exclude>app.getxray.xray.junit.customjunitxml.wip.TestingExperiments</exclude>

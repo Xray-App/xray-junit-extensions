@@ -16,6 +16,7 @@ import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 @Disabled
 @DisplayNameGeneration(MockedTestWithDisplayNameGeneratorClass.CustomGenerator.class)
@@ -28,12 +29,12 @@ public class MockedTestWithDisplayNameGeneratorClass {
         }
 
         @Override
-        public String generateDisplayNameForNestedClass(Class<?> nestedClass) {
+        public String generateDisplayNameForNestedClass(List<Class<?>> enclosingInstanceTypes, Class<?> nestedClass) {
             return "DisplayNameForNestedClass";
         }
 
         @Override
-        public String generateDisplayNameForMethod(Class<?> testClass, Method testMethod) {
+        public String generateDisplayNameForMethod(List<Class<?>> enclosingInstanceTypes, Class<?> testClass, Method testMethod) {
             return "DisplayNameForMethod";
         }
     }
