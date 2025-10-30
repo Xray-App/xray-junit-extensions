@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.engine.config.DefaultJupiterConfiguration;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
 import org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor;
-import org.junit.platform.engine.ConfigurationParameters;
 import org.junit.platform.engine.DiscoverySelector;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.UniqueId;
@@ -27,7 +26,6 @@ import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 import org.junit.platform.launcher.core.LauncherFactory;
-import org.junit.platform.testkit.engine.EngineTestKit;
 
 import java.util.Collections;
 import java.util.List;
@@ -39,9 +37,7 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectMethod;
-import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.discoveryRequest;
 import static org.mockito.Mockito.mock;
-import org.junit.platform.engine.OutputDirectoryCreator;
 
 class CustomXrayTestMetadataReaderTest {
 
