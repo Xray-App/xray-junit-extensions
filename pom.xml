@@ -9,6 +9,10 @@
     <description>Improvements for JUnit that allow you to take better advantage of JUnit 5/6 (jupiter engine) whenever using it together with Xray Test Management.</description>
     <url>https://github.com/Xray-App/xray-junit-extensions</url>
   
+    <scm>
+      <url>https://github.com/Xray-App/xray-junit-extensions</url>
+    </scm>
+    
     <licenses>
       <license>
         <name>Eclipse Public License v2.0</name>
