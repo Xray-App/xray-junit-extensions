@@ -38,9 +38,9 @@
     </developers>
   
     <scm>
-      <connection>scm:git:git://github.com/Xray-App/xray-§-extensions.git</connection>
+      <connection>scm:git:git://github.com/Xray-App/xray-junit-extensions.git</connection>
       <developerConnection>scm:git:ssh://github.com/Xray-App/xray-junit-extensions.git</developerConnection>
-      <url>https://github.com/Xray-App/xray-maven-plugin/tree/main</url>
+      <url>https://github.com/Xray-App/xray-junit-extensions</url>
     </scm>
 
     <properties>
