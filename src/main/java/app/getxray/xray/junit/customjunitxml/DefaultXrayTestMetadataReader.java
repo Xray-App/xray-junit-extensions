@@ -21,11 +21,13 @@ import org.junit.platform.engine.support.descriptor.MethodSource;
 import org.junit.platform.launcher.TestIdentifier;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DefaultXrayTestMetadataReader implements XrayTestMetadataReader {
 
@@ -41,6 +43,16 @@ public class DefaultXrayTestMetadataReader implements XrayTestMetadataReader {
         return getTestMethodAnnotation(testIdentifier, XrayTest.class)
                 .map(XrayTest::key)
                 .filter(s -> !s.isEmpty());
+    }
+
+    private Optional<Method> getTestMethod(final MethodSource source) {
+        try {
+            final Class<?> aClass = Class.forName(source.getClassName());
+            return Stream.of(aClass.getDeclaredMethods()).filter(method -> MethodSource.from(method).equals(source))
+                    .findAny();
+        } catch (ClassNotFoundException | NoClassDefFoundError e) {
+            return Optional.empty();
+        }
     }
 
     @Override
@@ -95,7 +107,7 @@ public class DefaultXrayTestMetadataReader implements XrayTestMetadataReader {
         return testIdentifier.getSource()
                 .filter(a -> a instanceof MethodSource)
                 .map(MethodSource.class::cast)
-                .map(MethodSource::getJavaMethod)
+                .flatMap(this::getTestMethod)
                 .flatMap(a -> AnnotationSupport.findAnnotation(a, aClass));
     }
 

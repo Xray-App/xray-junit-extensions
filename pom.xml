@@ -4,14 +4,10 @@
     <groupId>app.getxray</groupId>
     <artifactId>xray-junit-extensions</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <name>xray-junit-extensions</name>
     <description>Improvements for JUnit that allow you to take better advantage of JUnit 5/6 (jupiter engine) whenever using it together with Xray Test Management.</description>
     <url>https://github.com/Xray-App/xray-junit-extensions</url>
-  
-    <scm>
-      <url>https://github.com/Xray-App/xray-junit-extensions</url>
-    </scm>
     
     <licenses>
       <license>
@@ -42,9 +38,9 @@
     </developers>
   
     <scm>
-      <connection>scm:git:git://github.com/Xray-App/xray-§-extensions.git</connection>
+      <connection>scm:git:git://github.com/Xray-App/xray-junit-extensions.git</connection>
       <developerConnection>scm:git:ssh://github.com/Xray-App/xray-junit-extensions.git</developerConnection>
-      <url>https://github.com/Xray-App/xray-maven-plugin/tree/main</url>
+      <url>https://github.com/Xray-App/xray-junit-extensions</url>
     </scm>
 
     <properties>
