@@ -45,15 +45,15 @@ public class DefaultXrayTestMetadataReader implements XrayTestMetadataReader {
                 .filter(s -> !s.isEmpty());
     }
 
-	private Optional<Method> getTestMethod(final MethodSource source) {
-		try {
-			final Class<?> aClass = Class.forName(source.getClassName());
-			return Stream.of(aClass.getDeclaredMethods()).filter(method -> MethodSource.from(method).equals(source))
-					.findAny();
-		} catch (ClassNotFoundException | NoClassDefFoundError e) {
+    private Optional<Method> getTestMethod(final MethodSource source) {
+        try {
+            final Class<?> aClass = Class.forName(source.getClassName());
+            return Stream.of(aClass.getDeclaredMethods()).filter(method -> MethodSource.from(method).equals(source))
+                    .findAny();
+        } catch (ClassNotFoundException | NoClassDefFoundError e) {
             return Optional.empty();
-		}
-	}
+        }
+    }
 
     @Override
     public Optional<String> getSummary(TestIdentifier testIdentifier) {
