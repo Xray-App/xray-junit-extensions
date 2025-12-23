@@ -4,7 +4,7 @@
     <groupId>app.getxray</groupId>
     <artifactId>xray-junit-extensions</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <name>xray-junit-extensions</name>
     <description>Improvements for JUnit that allow you to take better advantage of JUnit 5/6 (jupiter engine) whenever using it together with Xray Test Management.</description>
     <url>https://github.com/Xray-App/xray-junit-extensions</url>
