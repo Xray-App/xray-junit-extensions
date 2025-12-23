@@ -105,6 +105,7 @@ public class DefaultXrayTestMetadataReader implements XrayTestMetadataReader {
 
     protected <A extends Annotation> Optional<A> getTestMethodAnnotation(TestIdentifier testIdentifier, Class<A> aClass) {
         return testIdentifier.getSource()
+                .filter(a -> a instanceof MethodSource)
                 .map(MethodSource.class::cast)
                 .flatMap(this::getTestMethod)
                 .flatMap(a -> AnnotationSupport.findAnnotation(a, aClass));
