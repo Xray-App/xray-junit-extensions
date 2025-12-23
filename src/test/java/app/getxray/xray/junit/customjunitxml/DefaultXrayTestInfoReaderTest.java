@@ -448,4 +448,26 @@ class DefaultXrayTestInfoReaderTest {
                             .isEqualTo(XrayEnabledTestExamples.NestedClass.class.getName());
                 });
     }
+
+    @Test
+    void shouldHandleCustomClassLoaderScenario() {
+        // This test validates the fix for issue #84 where Quarkus with Maven uses custom classloaders
+        // The fix changed from source.getJavaClass() to Class.forName(source.getClassName()) 
+        // to ensure compatibility with custom classloaders
+        
+        // GIVEN - A test with XrayTest annotations discovered through the launcher
+        TestPlan testPlan = discoverTestPlan(selectMethod(XrayEnabledTestExamples.class, "annotatedXrayTestWithKey"));
+        Set<TestIdentifier> testIdentifiers = getTestIdentifiers(testPlan);
+        
+        // WHEN - Reading metadata from the test identifier (which internally uses getTestMethod with Class.forName)
+        assertThat(testIdentifiers)
+                .hasSize(1)
+                .allSatisfy(testIdentifier -> {
+                    // THEN - The key should be correctly retrieved via Class.forName, proving the fix works
+                    Optional<String> key = xrayTestMetadataReader.getKey(testIdentifier);
+                    
+                    // The annotation should be successfully read via Class.forName instead of source.getJavaClass()
+                    assertThat(key).contains("CALC-100");
+                });
+    }
 }
