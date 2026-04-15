@@ -1,7 +1,6 @@
 # xray-junit-extensions
 
 [![build workflow](https://github.com/Xray-App/xray-junit-extensions/actions/workflows/CI.yml/badge.svg)](https://github.com/Xray-App/xray-junit-extensions/actions/workflows/CI.yml)
-[![Known Vulnerabilities](https://snyk.io/test/github/Xray-App/xray-junit-extensions/badge.svg)](https://snyk.io/test/github/Xray-App/xray-junit-extensions)
 ![code coverage](
 https://raw.githubusercontent.com/Xray-App/xray-junit-extensions/main/.github/badges/jacoco.svg)
 [![license](https://img.shields.io/badge/License-EPL%202.0-green.svg)](https://opensource.org/license/EPL-2.0)
